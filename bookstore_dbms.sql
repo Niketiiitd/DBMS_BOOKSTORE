@@ -15,7 +15,6 @@ create table if not exists customer(
 	customer_id int primary key,
     name varchar(255),
     address varchar(255),
-    -- Address_ID INT NOT NULL, 
     FOREIGN KEY (Address_ID) REFERENCES address(Address_ID),
     phone_number int not null,
     email varchar(255) not null,
@@ -64,7 +63,7 @@ create table vendor(
 );
 
 create table book(
-	book_id int auto_increment not null primary key,
+	book_id int auto_increment not null,
     book_title varchar(50) not null,
     book_author varchar(100) not null,
     book_genre varchar(50) not null,
@@ -73,23 +72,71 @@ create table book(
     book_title varchar(50) not null,
     book_availablity int not null,
     foreign key (VendorID) references vendor(VendorID),
-    book_price int not null
-    -- isbn to be added
-    --  book type to be added
+    book_price int not null,
+    foreign key (isbn_id) references isbn_info(isbn_id),
+    foreign key (book_type) references stockquantity(book_type),
+    primary key (book_id,VendorID)
+
 );
 
 
--- create table bookDescription(
--- 	description_id INT PRIMARY KEY AUTO_INCREMENT,
--- 	book_id INT,
---     FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
--- );
+
 
 create table admin(
 	adminID int not null primary key,
     hashed_password varchar(70) not null
 );
     
+    
+create table cart(
+	cart_id int not null auto_increment,
+	cart_price BIGINT,
+    foreign key (book_id) references book(book_id),
+    foreign key (customer_id) references customer(customer_id),
+    primary key (cart_id,customer_id,book_id) 
+);
+
+create table da_review(
+	da_review_id int not null auto_increment ,
+	agent_review int,
+    agent_review_description VARCHAR(512),
+    agent_review_date varchar(50) not null
+    );
+
+create table book_description(
+	book_description_id int not null auto_increment,
+    foreign key (book_id) references book(book_id),
+    book_description VARCHAR(512), -- content
+    primary key (book_id,book_description_id)
+);
+
+create table orderItem(
+	orderItem_id int not null auto_increment,
+	foreign key (book_id) references book(book_id),
+    foreign key (orderID) references orders(orderID),
+    quantity BIGINT ,
+    primary key (oderItem_id,book_id,orderID)
+);
+
+create table isbn_info(
+	isbn_id int not null auto_increment,
+    edition int ,
+    date_added varchar(50),
+    date_written varchar(50),
+    foreign key (book_id) references book(book_id),
+    primary key (book_id,isbn_id)
+);
+    
+    
+create table stockquantity(
+	stock_quantity_id int auto_increment not null,
+	foreign key (isbn_id) references isbn_info(isbn_id),
+    number_of_books int,
+    book_type VARCHAR(50),
+    primary key (isbn_id,stock_quantity_id)
+    );
+    
+
     
     
 
