@@ -130,3 +130,16 @@ VALUES
 ("INDIA ROAD, FLAT 3", 110090),
 ("XYZ ROAD, FLAT 67", 110008),
 ("GHJK ROAD,  45567", 800900);
+
+INSERT INTO Orders (Order_status, orderDATE, totalPrice)
+VALUES
+('Completed', '2024-02-01', 100),
+('Pending', '2024-02-02', 150),
+('Shipped', '2024-02-03', 120),
+('Completed', '2024-02-04', 200),
+('Pending', '2024-02-05', 180),
+('Shipped', '2024-02-06', 250),
+('Completed', '2024-02-07', 300),
+('Pending', '2024-02-08', 220),
+('Shipped', '2024-02-09', 280),
+('Completed', '2024-02-10', 320);
