@@ -36,16 +36,17 @@ CREATE TABLE IF NOT EXISTS Book (
 
 -- Customer table
 CREATE TABLE IF NOT EXISTS Customer (
-    customer_id INT PRIMARY KEY,
+    customer_id INT auto_increment PRIMARY KEY,
     customer_name VARCHAR(255),
     Address_ID INT not null,
     phone_number BIGINT unique NOT NULL,
     email VARCHAR(255) unique NOT NULL,
     customer_password VARCHAR(255) NOT NULL,
+    age int not null,
     FOREIGN KEY (Address_ID) REFERENCES Address(Address_ID)
 );
 
-
+-- select * from customer;
 -- Delivery Agent table
 CREATE TABLE IF NOT EXISTS DeliveryAgent (
     daID INT AUTO_INCREMENT PRIMARY KEY,
@@ -59,7 +60,8 @@ CREATE TABLE IF NOT EXISTS DeliveryAgent (
 CREATE TABLE IF NOT EXISTS Warehouse (
     warehouseID INT AUTO_INCREMENT PRIMARY KEY,
     address VARCHAR(255) unique NOT NULL,
-    pincode INT NOT NULL
+    pincode INT NOT NULL,
+    FOREIGN KEY (Address_ID) REFERENCES Address(Address_ID)
 );
 
 -- Orders table
@@ -94,6 +96,7 @@ CREATE TABLE IF NOT EXISTS Cart (
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
     FOREIGN KEY (book_id) REFERENCES Book(book_id)
 );
+
 
 -- Delivery Agent Review table
 CREATE TABLE IF NOT EXISTS DAgentReview (
@@ -143,139 +146,3 @@ CREATE TABLE IF NOT EXISTS StockQuantity (
     FOREIGN KEY (isbn_id) REFERENCES ISBNInfo(isbn_id)
 );
 
-
-
-
-
-
---     
--- select * from customer;
--- select * from books;
-
-
-
-
-
--- -- Inserting values in Vendor
--- Insert into vendor(Name,Email,Age,Phone_number)
--- VALUES
--- ('Chetan','chetan@gmail.com',30,9876543210),
--- ('Rahul','rahul@yahoo.com',25,8362572535),
--- ('Yash','yash@gmail.com',22,9562572535);
-
--- -- Selecting data from the 'vendor' table
--- Select * From vendor;
-
--- -- Altering Tables Books and customer
--- ALTER TABLE customer
--- MODIFY COLUMN  CustomerID INT AUTO_INCREMENT;
--- Select * from customer;
-
--- Alter table books
--- MODIFY COLUMN BookID INT AUTO_INCREMENT;
-
--- -- Inserting Value in Books
--- Insert into books (Title, Author, Genre, Series, Publication, Availability_status, Price, Type)
--- VALUES
--- ('The Great Gatsby','F SCott Fitzgerald', 'Historical fiction','The Great Gatsby', 'Jain', 'Available', 500, 'E-book');
-
--- -- Selecting data from the 'books' table
--- Select * From books;
-
--- -- Creating Table  Orders
-
-
--- -- Inserting values into orders
--- INSERT INTO  orders (Order_status,orderDATE,totalPrice)
--- VALUES
--- ('Dispatched','2023-12-14',450),
--- ('Delivered','2023-12-16',500),
--- ('Recieved','2023-12-18',800);
-
--- select * from orders;
-
--- -- create a table orderitem
-
--- CREATE TABLE orderItem (
---     quantity INT NOT NULL    
--- );
-
--- -- insert some values
--- INSERT INTO orderItem (quantity)
--- VALUES 
--- (3),
--- (5),
--- (7),
--- (2),
--- (1),
--- (2),
--- (9),
--- (6),
--- (1),
--- (3);
-
--- -- fetch some values
--- SELECT * FROM orderItem;
-
--- -- creating table Admins
--- create table Admins(
---     AdminID int AUTO_INCREMENT PRIMARY KEY,
---     Pass VARCHAR(10) NOT NULL
--- );
-
--- -- Inserting into Admin
--- insert into admins(Pass) 
--- values 
--- ('admin1'),
--- ('admin2'),
--- ('admin3'),
--- ('admin4');
--- -- Selecting admin details
--- select * from admins;
-
--- Delete from admins where AdminID > 4; -- Deleting the extra records.
-
-
-
--- Alter Table deliveryAgent
--- MODIFY COLUMN da_password VARCHAR(20) NOT NULL;
-
--- -- insert some values
--- INSERT INTO deliveryAgent (name,da_password,availability,da_phone_no)
--- VALUES  
--- ("Suresh Singh","abc123", "available", 6666777777),
--- ("Sonu Kumar","xxy67", "not available", 6969696969),
--- ("Gajendra Singh Chauhan","book234", "not available", 9999666888),
--- ("Priyanshu Dwivedi","45priy", "available", 1234567898),
--- ("Satish Pal","ravish456", "available", 4204204204),
--- ("Naveen Nayak","shrishti5", "available", 1212121212),
--- ("Rajendra Gupta","jjk@689", "not available", 8888888889),
--- ("Salman Khan","suhana@nepo", "available", 4444455555),
--- ("Pradeep Kumar","kumar_sahab", "not available", 3453453457),
--- ("Vineet Batra","batra@bkl", "available", 6666778887);
-
--- -- fetch some values
--- SELECT * FROM deliveryAgent;
--- SELECT * FROM deliveryAgent WHERE availability="available";
-
--- -- create a table
-
-
-
--- -- insert some values
--- INSERT INTO warehouse (address, pincode)
--- VALUES
-
--- ("ABC ROAD, FLAT 67", 110092),
--- ("XYZ VIHAR, FLAT 123", 110020),
--- ("QWERTY, HOUSE 78", 110002),
--- ("ABC ROAD, FLAT 80", 110092),
--- ("MG ROAD, 567", 110001),
--- ("ABCDE, 678", 123456),
--- ("JKL, BUILDING 445", 345123),
--- ("INDIA ROAD, FLAT 3", 110090),
--- ("XYZ ROAD, FLAT 67", 110008),
--- ("GHJK ROAD,  45567", 800900);
-
--- -- Fetching Values
--- select * from warehouse;
