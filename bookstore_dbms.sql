@@ -31,45 +31,51 @@ CREATE TABLE IF NOT EXISTS Book (
     book_availability INT NOT NULL,
     VendorID INT,
     book_price INT NOT NULL,
+    CONSTRAINT chk_product_price_positive CHECK (book_price >= 0), -- Ensure non-negative product price
     FOREIGN KEY (VendorID) REFERENCES Vendor(VendorID)
 );
 
 -- Customer table
 CREATE TABLE IF NOT EXISTS Customer (
-    customer_id INT auto_increment PRIMARY KEY,
+    customer_id INT AUTO_INCREMENT PRIMARY KEY,
     customer_name VARCHAR(255),
-    Address_ID INT not null,
-    phone_number BIGINT unique NOT NULL,
-    email VARCHAR(255) unique NOT NULL,
+    Address_ID INT NOT NULL,
+    phone_number BIGINT UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
     customer_password VARCHAR(255) NOT NULL,
-    age int not null,
+    age INT NOT NULL,
+    CONSTRAINT chk_person_phone CHECK (phone_number > 0 AND phone_number <= 9999999999),
+    CONSTRAINT chk_person_email CHECK (email LIKE '%@%'),
+    CONSTRAINT chk_person_password_length CHECK (LENGTH(customer_password) >= 6),
     FOREIGN KEY (Address_ID) REFERENCES Address(Address_ID)
 );
 
--- select * from customer;
+
 -- Delivery Agent table
 CREATE TABLE IF NOT EXISTS DeliveryAgent (
     daID INT AUTO_INCREMENT PRIMARY KEY,
 	da_name VARCHAR(255) NOT NULL,
     da_password VARCHAR(50) NOT NULL,
-    availability VARCHAR(20) NOT NULL,
-    da_phone_no BIGINT unique NOT NULL
+    availability VARCHAR(20) NOT NULL CHECK (availability IN ('Available', 'Unavailable')),
+    da_phone_no BIGINT UNIQUE NOT NULL
 );
+
 
 -- Warehouse table
 CREATE TABLE IF NOT EXISTS Warehouse (
     warehouseID INT AUTO_INCREMENT PRIMARY KEY,
     address VARCHAR(255) unique NOT NULL,
-    pincode INT NOT NULL,
-    FOREIGN KEY (Address_ID) REFERENCES Address(Address_ID)
+    pincode INT NOT NULL
 );
 
 -- Orders table
 CREATE TABLE IF NOT EXISTS Orders (
     orderID INT AUTO_INCREMENT PRIMARY KEY,
-    Order_status VARCHAR(255) NOT NULL,
+    Order_status VARCHAR(255) NOT NULL CHECK (Order_status IN ('Scheduled', 'In transit', 'Out for delivery', 'Delivered','Cancelled')),
     orderDATE DATE NOT NULL,
-    totalPrice INT NOT NULL
+    totalPrice INT NOT NULL,
+    customer_id INT,
+    FOREIGN KEY (customer_id) REFERENCES Book(book_id)
 );
 
 -- Product review table
@@ -78,35 +84,43 @@ CREATE TABLE IF NOT EXISTS ProductReview (
     book_id INT NOT NULL,
     rating INT NOT NULL,
     content VARCHAR(255) NOT NULL,
+    CONSTRAINT chk_vendor_rating_range CHECK (rating >= 0 AND rating <= 5),
     FOREIGN KEY (book_id) REFERENCES Book(book_id)
 );
 
 -- Admin table
 CREATE TABLE IF NOT EXISTS MAIN_ADMIN (
     adminID INT NOT NULL PRIMARY KEY,
-    hashed_password VARCHAR(70) NOT NULL
+    hashed_password VARCHAR(70) NOT NULL,
+    CONSTRAINT chk_password_complexity CHECK (hashed_password REGEXP '[^a-zA-Z]')
 );
 
+
+-- Cart table
 -- Cart table
 CREATE TABLE IF NOT EXISTS Cart (
     cart_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     cart_price BIGINT,
     customer_id INT NOT NULL,
     book_id INT NOT NULL,
+    quantity INT NOT NULL,
+    CONSTRAINT chk_quantity_positive CHECK (quantity > 0), -- Ensure quantity is greater than 0
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
     FOREIGN KEY (book_id) REFERENCES Book(book_id)
 );
+
 
 
 -- Delivery Agent Review table
 CREATE TABLE IF NOT EXISTS DAgentReview (
     da_review_id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     daID INT NOT NULL,
-    agent_review INT,
+    agent_review INT CHECK (agent_review BETWEEN 1 AND 5), -- Check constraint for agent review between 1 and 5
     agent_review_description VARCHAR(512),
     agent_review_date VARCHAR(50) NOT NULL,
     FOREIGN KEY (daID) REFERENCES DeliveryAgent(daID)
 );
+
 
 -- Book description table
 CREATE TABLE IF NOT EXISTS BookDescription (
@@ -136,13 +150,11 @@ CREATE TABLE IF NOT EXISTS ISBNInfo (
     FOREIGN KEY (book_id) REFERENCES Book(book_id)
 );
 
--- Stock Quantity table
 CREATE TABLE IF NOT EXISTS StockQuantity (
     stock_quantity_id INT AUTO_INCREMENT NOT NULL,
     isbn_id INT NOT NULL,
-    number_of_books INT,
+    number_of_books INT CHECK (number_of_books > 0), -- Constraint check for positive quantity
     book_type VARCHAR(50),
     PRIMARY KEY (stock_quantity_id, isbn_id),
     FOREIGN KEY (isbn_id) REFERENCES ISBNInfo(isbn_id)
 );
-
