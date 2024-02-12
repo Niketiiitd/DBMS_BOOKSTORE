@@ -131,6 +131,7 @@ VALUES
 ("XYZ ROAD, FLAT 67", 110008),
 ("GHJK ROAD,  45567", 800900);
 
+--Inserting Values in Orders Table
 INSERT INTO Orders (Order_status, orderDATE, totalPrice)
 VALUES
 ('Completed', '2024-02-01', 100),
@@ -143,3 +144,129 @@ VALUES
 ('Pending', '2024-02-08', 220),
 ('Shipped', '2024-02-09', 280),
 ('Completed', '2024-02-10', 320);
+
+--Inserting Values in ProductReviews Table
+INSERT INTO ProductReview (book_id, rating, content)
+VALUES
+(1, 5, 'Great book! Highly recommended.'),
+(2, 4, 'Interesting read, but could be better.'),
+(3, 5, 'Absolutely loved it! Must-read for everyone.'),
+(1, 3, 'Decent book, but not exceptional.'),
+(2, 5, 'One of the best books I have ever read!'),
+(3, 4, 'Well-written and thought-provoking.'),
+(1, 4, 'Enjoyed reading it, would recommend.'),
+(2, 3, 'Good book, but not my favorite.'),
+(3, 5, 'Couldn''t put it down! Amazing story.'),
+(1, 5, 'Incredible! Changed my perspective.');
+
+--Inserting Values in Main_Admin Table
+INSERT INTO MAIN_ADMIN (adminID, hashed_password)
+VALUES
+(1, 'admin1'),
+(2, 'admin2'),
+(3, 'admin3'),
+(4, 'admin4');
+
+--Inserting Values in Cart Table
+INSERT INTO Cart (cart_price, customer_id, book_id)
+VALUES
+(150, 1, 1),
+(200, 2, 2),
+(180, 3, 3),
+(220, 1, 4),
+(250, 2, 5),
+(300, 3, 6),
+(280, 1, 7),
+(320, 2, 8),
+(350, 3, 9),
+(380, 1, 10);
+
+--Inserting Values in DAgentReview
+INSERT INTO DAgentReview (daID, agent_review, agent_review_description, agent_review_date)
+VALUES
+(1, 4, 'Professional service, timely delivery.', '2024-02-01'),
+(2, 5, 'Excellent service, highly recommended.', '2024-02-02'),
+(3, 3, 'Average service, could improve communication.', '2024-02-03'),
+(1, 4, 'Polite and helpful delivery agent.', '2024-02-04'),
+(2, 5, 'Friendly and efficient delivery, thank you!', '2024-02-05'),
+(3, 2, 'Late delivery, needs improvement.', '2024-02-06'),
+(1, 5, 'Great service overall, no complaints.', '2024-02-07'),
+(2, 4, 'Good communication and prompt delivery.', '2024-02-08'),
+(3, 3, 'Delivery agent was rude and unprofessional.', '2024-02-09'),
+(1, 5, 'Best delivery experience so far!', '2024-02-10');
+
+--Insering Values in BookDescription Table
+INSERT INTO BookDescription (book_id, book_description)
+VALUES
+(1, 'A gripping tale of love and loss set in a post-apocalyptic world.'),
+(2, 'A fantasy epic filled with magic, dragons, and adventure.'),
+(3, 'An insightful exploration of the human condition through the eyes of a young protagonist.'),
+(4, 'A historical novel set during the French Revolution, filled with intrigue and romance.'),
+(5, 'A science fiction masterpiece that challenges perceptions of reality and identity.'),
+(6, 'A heartwarming story of friendship and courage in the face of adversity.'),
+(7, 'A thrilling mystery set in Victorian London, with twists and turns at every corner.'),
+(8, 'An exploration of race, identity, and society in contemporary America.'),
+(9, 'A poetic journey through the landscapes of memory and longing.'),
+(10, 'An inspiring tale of redemption and forgiveness in a small town.'),
+(11, 'A gripping thriller that keeps you on the edge of your seat until the very end.'),
+(12, 'A heart-wrenching story of love and sacrifice in wartime.'),
+(13, 'An exploration of family dynamics and secrets in a small town.'),
+(14, 'A dystopian adventure set in a society where books are forbidden.'),
+(15, 'A whimsical journey through a magical realm filled with talking animals and enchantments.'),
+(16, 'A psychological thriller that delves into the depths of the human mind.'),
+(17, 'A coming-of-age tale set against the backdrop of the Civil Rights Movement.'),
+(18, 'An epic quest to save the kingdom from darkness and despair.'),
+(19, 'A contemporary romance that explores the complexities of modern relationships.'),
+(20, 'A collection of short stories that spans genres and themes, showcasing the diversity of human experience.');
+
+--Inserting Values in OrderItem table
+INSERT INTO OrderItem (book_id, orderID, quantity)
+VALUES
+(1, 1, 2),
+(2, 1, 1),
+(3, 2, 3),
+(4, 2, 1),
+(5, 3, 2),
+(6, 3, 1),
+(7, 4, 2),
+(8, 4, 1),
+(9, 5, 3),
+(10, 5, 2);
+
+--Inserting values in ISBNInfo table
+INSERT INTO ISBNInfo (book_id, edition, date_added, date_written)
+VALUES
+(1, 1, '2023-01-15', '2022-12-01'),
+(2, 2, '2023-02-20', '2023-01-01'),
+(3, 1, '2023-03-25', '2023-02-15'),
+(4, 3, '2023-04-30', '2023-03-10'),
+(5, 1, '2023-05-05', '2023-04-20'),
+(6, 2, '2023-06-10', '2023-05-01'),
+(7, 1, '2023-07-15', '2023-06-05'),
+(8, 1, '2023-08-20', '2023-07-15'),
+(9, 2, '2023-09-25', '2023-08-01'),
+(10, 1, '2023-10-30', '2023-09-15'),
+(11, 1, '2023-11-05', '2023-10-20'),
+(12, 2, '2023-12-10', '2023-11-01'),
+(13, 1, '2024-01-15', '2023-12-05'),
+(14, 3, '2024-02-20', '2024-01-01'),
+(15, 1, '2024-03-25', '2024-02-15'),
+(16, 2, '2024-04-30', '2024-03-10'),
+(17, 1, '2024-05-05', '2024-04-20'),
+(18, 1, '2024-06-10', '2024-05-01'),
+(19, 2, '2024-07-15', '2024-06-05'),
+(20, 1, '2024-08-20', '2024-07-15');
+
+--Inserting Values in StockQuantity Table
+INSERT INTO StockQuantity (isbn_id, number_of_books, book_type)
+VALUES
+(1, 100, 'hardcopy'),
+(2, 150, 'specialedition'),
+(3, 120, 'ebook'),
+(4, 200, 'hardcopy'),
+(5, 180, 'specialedition'),
+(6, 90, 'ebook'),
+(7, 300, 'hardcopy'),
+(8, 250, 'hardcopy'),
+(9, 130, 'ebook'),
+(10, 220, 'specialedition');
