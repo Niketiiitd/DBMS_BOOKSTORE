@@ -102,3 +102,31 @@ INSERT INTO Customer (customer_name, Address_ID, phone_number, email, customer_p
 ('Patricia Walker', 18, 9012345678, 'patricia@example.com', 'password18'),
 ('Matthew Hall', 19, 1234567890, 'matthew2@example.com', 'password19'),
 ('Karen Young', 20, 2345678901, 'karen@example.com', 'password20');
+
+--Insert Values in DeliveryAgent Table
+INSERT INTO DeliveryAgent (name,da_password,availability,da_phone_no)
+VALUES  
+("Suresh Singh","abc123", "available", 6666777777),
+("Sonu Kumar","xxy67", "not available", 6969696969),
+("Gajendra Singh Chauhan","book234", "not available", 9999666888),
+("Priyanshu Dwivedi","45priy", "available", 1234567898),
+("Satish Pal","ravish456", "available", 4204204204),
+("Naveen Nayak","shrishti5", "available", 1212121212),
+("Rajendra Gupta","jjk@689", "not available", 8888888889),
+("Salman Khan","suhana@nepo", "available", 4444455555),
+("Pradeep Kumar","kumar_sahab", "not available", 3453453457),
+("Vineet Batra","batra@bkl", "available", 6666778887);
+
+--Insert Values in Warehouse Table
+INSERT INTO warehouse (address, pincode)
+VALUES
+("ABC ROAD, FLAT 67", 110092),
+("XYZ VIHAR, FLAT 123", 110020),
+("QWERTY, HOUSE 78", 110002),
+("ABC ROAD, FLAT 80", 110092),
+("MG ROAD, 567", 110001),
+("ABCDE, 678", 123456),
+("JKL, BUILDING 445", 345123),
+("INDIA ROAD, FLAT 3", 110090),
+("XYZ ROAD, FLAT 67", 110008),
+("GHJK ROAD,  45567", 800900);
