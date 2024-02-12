@@ -15,9 +15,9 @@ CREATE TABLE IF NOT EXISTS Address (
 CREATE TABLE IF NOT EXISTS Vendor (
     VendorID INT AUTO_INCREMENT PRIMARY KEY,
     vendor_name VARCHAR(255) NOT NULL,
-    Email VARCHAR(255) NOT NULL,
+    Email VARCHAR(255) unique NOT NULL,
     Age INT,
-    Phone_number BIGINT
+    Phone_number BIGINT unique
 );
 
 -- Book table
@@ -37,27 +37,27 @@ CREATE TABLE IF NOT EXISTS Book (
 -- Customer table
 CREATE TABLE IF NOT EXISTS Customer (
     customer_id INT PRIMARY KEY,
-    name VARCHAR(255),
-    Address_ID INT,
-    phone_number BIGINT NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    Password VARCHAR(255) NOT NULL,
+    customer_name VARCHAR(255),
+    Address_ID INT not null,
+    phone_number BIGINT unique NOT NULL,
+    email VARCHAR(255) unique NOT NULL,
+    customer_password VARCHAR(255) NOT NULL,
     FOREIGN KEY (Address_ID) REFERENCES Address(Address_ID)
 );
 
 -- Delivery Agent table
 CREATE TABLE IF NOT EXISTS DeliveryAgent (
     daID INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    da_password VARCHAR(10) NOT NULL,
+	da_name VARCHAR(255) NOT NULL,
+    da_password VARCHAR(50) NOT NULL,
     availability VARCHAR(20) NOT NULL,
-    da_phone_no BIGINT NOT NULL
+    da_phone_no BIGINT unique NOT NULL
 );
 
 -- Warehouse table
 CREATE TABLE IF NOT EXISTS Warehouse (
     warehouseID INT AUTO_INCREMENT PRIMARY KEY,
-    address VARCHAR(255) NOT NULL,
+    address VARCHAR(255) unique NOT NULL,
     pincode INT NOT NULL
 );
 
@@ -142,14 +142,16 @@ CREATE TABLE IF NOT EXISTS StockQuantity (
     FOREIGN KEY (isbn_id) REFERENCES ISBNInfo(isbn_id)
 );
 
-    
-    
+
+
+
+
 
 --     
 -- select * from customer;
 -- select * from books;
 
--- -- Creating Table Vendor
+
 
 
 
