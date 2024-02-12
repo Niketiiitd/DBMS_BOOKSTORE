@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS Customer (
     FOREIGN KEY (Address_ID) REFERENCES Address(Address_ID)
 );
 
+
 -- Delivery Agent table
 CREATE TABLE IF NOT EXISTS DeliveryAgent (
     daID INT AUTO_INCREMENT PRIMARY KEY,

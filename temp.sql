@@ -1,5 +1,3 @@
-use bookstore_dbms;
-
 
 INSERT INTO Address (House_NO, Street_Name, City, State, Zip) VALUES
 (123, 'Main Street', 'New York City', 'New York', 10001),
@@ -76,9 +74,9 @@ INSERT INTO Book (book_title, book_author, book_genre, book_series, book_publica
 ('Frankenstein', 'Mary Shelley', 'Gothic', 'Frankenstein Series', 'Lackington, Hughes, Harding, Mavor & Jones', 105, 20, 3400);
 
 
--- delete from Book;
--- ALTER TABLE Book AUTO_INCREMENT = 1;
--- select * from Book;
+delete from Book;
+ALTER TABLE Book AUTO_INCREMENT = 1;
+select * from Book;
 
 -- Insert 20 entries into the Customer table
 INSERT INTO Customer (customer_name, Address_ID, phone_number, email, customer_password) VALUES
