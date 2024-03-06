@@ -158,3 +158,5 @@ CREATE TABLE IF NOT EXISTS StockQuantity (
     PRIMARY KEY (stock_quantity_id, isbn_id),
     FOREIGN KEY (isbn_id) REFERENCES ISBNInfo(isbn_id)
 );
+
+

@@ -1,4 +1,4 @@
-use bookstore_dbms;
+use bookshop;
 
 
 INSERT INTO Address (House_NO, Street_Name, City, State, Zip) VALUES
@@ -157,7 +157,7 @@ INSERT INTO Orders (Order_status, orderDATE, totalPrice, customer_id) VALUES
 ('Delivered', '2024-01-02', 200, 2),
 ('Cancelled', '2024-01-03', 100, 3),
 ('Scheduled', '2024-01-04', 250, 4),
-('Delivered', '2024-01-05', 300, 5),
+('Out for delivery', '2024-01-05', 300, 5),
 ('Scheduled', '2024-01-06', 180, 6),
 ('Scheduled', '2024-01-07', 220, 7),
 ('Delivered', '2024-01-08', 190, 8),
@@ -169,7 +169,7 @@ INSERT INTO Orders (Order_status, orderDATE, totalPrice, customer_id) VALUES
 ('Delivered', '2024-01-14', 270, 4),
 ('Scheduled', '2024-01-15', 150, 5),
 ('Scheduled', '2024-01-16', 200, 6),
-('Delivered', '2024-01-17', 180, 7),
+('Out for delivery', '2024-01-17', 180, 7),
 ('Scheduled', '2024-01-18', 250, 8),
 ('Delivered', '2024-01-19', 300, 9),
 ('Scheduled', '2024-01-20', 220, 10);
@@ -179,7 +179,7 @@ INSERT INTO Orders (Order_status, orderDATE, totalPrice, customer_id) VALUES
 INSERT INTO ProductReview (book_id, rating, content) VALUES
 (1, 5, 'This book was fantastic! I couldn''t put it down.'),
 (1, 4, 'Enjoyed reading this book, although the ending felt rushed.'),
-(2, 3, 'The plot was interesting, but the writing style was not my favorite.'),
+(2, 2, 'The plot was interesting, but the writing style was not my favorite.'),
 (3, 5, 'Absolutely loved this book! Highly recommend it to everyone.'),
 (4, 2, 'Disappointed with this book. Expected more from the author.'),
 (5, 4, 'A gripping read with well-developed characters.'),
@@ -195,8 +195,7 @@ INSERT INTO ProductReview (book_id, rating, content) VALUES
 (15, 5, 'A must-read for fans of the genre!'),
 (16, 4, 'Thoroughly enjoyed every page of this book.'),
 (17, 3, 'Had some good moments but overall fell short.'),
-(18, 5, 'Couldn''t recommend this book enough!'),
-(19, 4, 'Well-written and thought-provoking.'),
+(17, 5, 'Couldn''t recommend this book enough!'),
 (20, 2, 'Struggled to connect with the story and characters.');
 
 
@@ -232,7 +231,6 @@ INSERT INTO DAgentReview (daID, agent_review, agent_review_description, agent_re
 (6, 2, 'Delivery delayed without prior notice.', '2024-02-15'),
 (7, 4, 'Good service overall.', '2024-02-16'),
 (8, 3, 'Delivery agent was polite but delivery was late.', '2024-02-17'),
-(9, 5, 'Delivery agent was very helpful.', '2024-02-18'),
 (10, 4, 'Timely delivery and good communication.', '2024-02-19'),
 (11, 3, 'Average service, room for improvement.', '2024-02-20'),
 (12, 5, 'Exceptional service, highly recommended.', '2024-02-21'),
@@ -242,7 +240,6 @@ INSERT INTO DAgentReview (daID, agent_review, agent_review_description, agent_re
 (16, 3, 'Service was okay, could be better.', '2024-02-25'),
 (17, 4, 'No issues with the delivery, satisfied overall.', '2024-02-26'),
 (18, 5, 'Excellent service, would use again.', '2024-02-27'),
-(19, 3, 'Delivery agent was late, but polite.', '2024-02-28'),
 (20, 4, 'Smooth and hassle-free delivery process.', '2024-02-29');
 
 
@@ -322,7 +319,7 @@ INSERT INTO ISBNInfo (book_id, edition, date_added, date_written) VALUES
 
 -- Inserting data into StockQuantity table
 INSERT INTO StockQuantity (isbn_id, number_of_books, book_type) VALUES
-(1, 100, 'Paperback'),  -- The Great Gatsby - ISBN: 1, Paperback - Quantity: 100
+(1, 9, 'Paperback'),  -- The Great Gatsby - ISBN: 1, Paperback - Quantity: 100
 (2, 120, 'Hardcover'),  -- To Kill a Mockingbird - ISBN: 2, Hardcover - Quantity: 120
 (3, 90, 'Paperback'),   -- 1984 - ISBN: 3, Paperback - Quantity: 90
 (4, 80, 'Paperback'),   -- Pride and Prejudice - ISBN: 4, Paperback - Quantity: 80
@@ -333,12 +330,12 @@ INSERT INTO StockQuantity (isbn_id, number_of_books, book_type) VALUES
 (9, 150, 'Hardcover'),  -- The Lord of the Rings - ISBN: 9, Hardcover - Quantity: 150
 (10, 130, 'Paperback'), -- The Hobbit - ISBN: 10, Paperback - Quantity: 130
 (11, 180, 'Hardcover'), -- Harry Potter and the Philosopher's Stone - ISBN: 11, Hardcover - Quantity: 180
-(12, 75, 'Paperback'),  -- Moby-Dick - ISBN: 12, Paperback - Quantity: 75
+(12, 8, 'Paperback'),  -- Moby-Dick - ISBN: 12, Paperback - Quantity: 75
 (13, 110, 'Hardcover'), -- Ulysses - ISBN: 13, Hardcover - Quantity: 110
 (14, 95, 'Paperback'),  -- The Odyssey - ISBN: 14, Paperback - Quantity: 95
 (15, 100, 'Hardcover'), -- Don Quixote - ISBN: 15, Hardcover - Quantity: 100
 (16, 120, 'Paperback'), -- War and Peace - ISBN: 16, Paperback - Quantity: 120
 (17, 80, 'Paperback'),  -- The Brothers Karamazov - ISBN: 17, Paperback - Quantity: 80
 (18, 90, 'Hardcover'),  -- The Picture of Dorian Gray - ISBN: 18, Hardcover - Quantity: 90
-(19, 85, 'Paperback'),  -- Alice's Adventures in Wonderland - ISBN: 19, Paperback - Quantity: 85
+(19, 2, 'Paperback'),  -- Alice's Adventures in Wonderland - ISBN: 19, Paperback - Quantity: 85
 (20, 100, 'Hardcover'); -- Frankenstein - ISBN: 20, Hardcover - Quantity: 100
