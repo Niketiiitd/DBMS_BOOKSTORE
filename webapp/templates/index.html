@@ -69,14 +69,16 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
     <header>
         <h1>Welcome to Our Online Bookstore</h1>
-        <!-- Login Button -->
-        <button class="login-button" onclick="openLoginSignupPage()">Login / Sign Up</button>
+        <!-- Login and Register Buttons -->
+        <button class="login-button" onclick="openLoginPage()">Login</button>
+        <button class="login-button" onclick="openRegisterPage()">Register</button>
     </header>
     <nav>
         <a href="#">Home</a>
@@ -111,8 +113,12 @@
     </footer>
 
     <script>
-        function openLoginSignupPage() {
+        function openLoginPage() {
             window.open("login_signup.html", "_blank");
+        }
+
+        function openRegisterPage() {
+            window.open("register.html", "_blank");
         }
     </script>
 </body>

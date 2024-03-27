@@ -3,8 +3,8 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 
-
 @app.route("/")
+@app.route("/home")
 def home():
     return render_template('index.html')
 
@@ -16,12 +16,12 @@ def about():
 
 @app.route("/login")
 def login():
-    return render_template('templates/login_signup.html')  # Adjust the path
+    return render_template('login_signup.html')
 
 
 @app.route("/signup")
 def signup():
-    return render_template('templates/login_signup.html')  # Adjust the path
+    return render_template('login_signup.html')
 
 
 if __name__ == '__main__':
