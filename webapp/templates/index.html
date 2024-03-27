@@ -58,11 +58,8 @@
             width: 100%;
         }
 
-        /* Styles for the login button */
+        /* Styles for the login buttons */
         .login-button {
-            position: absolute;
-            top: 20px;
-            right: 20px;
             padding: 10px 20px;
             background-color: #333;
             color: #fff;
@@ -71,14 +68,18 @@
             cursor: pointer;
             margin-right: 10px;
         }
+
+        /* Styles for the login button */
+        .login-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>Welcome to Our Online Bookstore</h1>
-        <!-- Login and Register Buttons -->
-        <button class="login-button" onclick="openLoginPage()">Login</button>
-        <button class="login-button" onclick="openRegisterPage()">Register</button>
     </header>
     <nav>
         <a href="#">Home</a>
@@ -111,6 +112,13 @@
     <footer>
         <p>&copy; 2024 Online Bookstore. All rights reserved.</p>
     </footer>
+
+    <div class="login-container">
+        <!-- Login Button -->
+        <button class="login-button" onclick="openLoginPage()">Login</button>
+        <!-- Register Button -->
+        <button class="login-button" onclick="openRegisterPage()">Register</button>
+    </div>
 
     <script>
         function openLoginPage() {
