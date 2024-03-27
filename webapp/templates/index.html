@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookstore Home</title>
+    <style>
+        /* Styles for the existing content */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+        }
+        nav {
+            background-color: #666;
+            padding: 10px 0;
+            text-align: center;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 0 20px;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+        .book {
+            float: left;
+            width: 30%;
+            padding: 20px;
+            margin: 1%;
+            background-color: #fff;
+            box-sizing: border-box;
+        }
+        .book img {
+            width: 100%;
+            height: auto;
+        }
+        .book h3 {
+            margin-top: 0;
+        }
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 20px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        /* Styles for the login button */
+        .login-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome to Our Online Bookstore</h1>
+        <!-- Login Button -->
+        <button class="login-button" onclick="openLoginSignupPage()">Login / Sign Up</button>
+    </header>
+    <nav>
+        <a href="#">Home</a>
+        <a href="#">Books</a>
+        <a href="#">About Us</a>
+        <a href="#">Contact</a>
+    </nav>
+    <div class="container">
+        <div class="book">
+            <img src="book1.jpg" alt="Book 1">
+            <h3>Book Title 1</h3>
+            <p>Author Name</p>
+            <p>$10.99</p>
+        </div>
+        <div class="book">
+            <img src="book2.jpg" alt="Book 2">
+            <h3>Book Title 2</h3>
+            <p>Author Name</p>
+            <p>$12.99</p>
+        </div>
+        <div class="book">
+            <img src="book3.jpg" alt="Book 3">
+            <h3>Book Title 3</h3>
+            <p>Author Name</p>
+            <p>$9.99</p>
+        </div>
+        <!-- Add more books as needed -->
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Online Bookstore. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function openLoginSignupPage() {
+            window.open("login_signup.html", "_blank");
+        }
+    </script>
+</body>
+</html>
