@@ -100,15 +100,15 @@ CREATE TABLE IF NOT EXISTS MAIN_ADMIN (
 
 
 -- Cart table
--- Cart table
 CREATE TABLE IF NOT EXISTS Cart (
-    cart_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    cart_id INT AUTO_INCREMENT PRIMARY KEY,
     cart_price BIGINT,
     customer_id INT NOT NULL,
     book_id INT NOT NULL,
     quantity INT NOT NULL,
     CONSTRAINT chk_quantity_positive CHECK (quantity > 0), -- Ensure quantity is greater than 0
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
+  
     FOREIGN KEY (book_id) REFERENCES Book(book_id)
 );
 
@@ -135,15 +135,15 @@ CREATE TABLE IF NOT EXISTS BookDescription (
     FOREIGN KEY (book_id) REFERENCES Book(book_id)
 );
 
--- Order Item table
 CREATE TABLE IF NOT EXISTS OrderItem (
-    orderItem_id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    order_item_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
     book_id INT NOT NULL,
-    orderID INT NOT NULL,
-    quantity BIGINT,
-    FOREIGN KEY (book_id) REFERENCES Book(book_id),
-    FOREIGN KEY (orderID) REFERENCES Orders(orderID)
+    quantity INT NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES customer_order(order_id),
+    FOREIGN KEY (book_id) REFERENCES Book(book_id)
 );
+
 
 -- ISBN Information table
 CREATE TABLE IF NOT EXISTS ISBNInfo (
@@ -163,6 +163,20 @@ CREATE TABLE IF NOT EXISTS StockQuantity (
     PRIMARY KEY (stock_quantity_id, isbn_id),
     FOREIGN KEY (isbn_id) REFERENCES ISBNInfo(isbn_id)
 );
+
+CREATE TABLE IF NOT EXISTS customer_order (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    customer_id INT NOT NULL,
+    total_price BIGINT NOT NULL,
+    order_status VARCHAR(255) NOT NULL DEFAULT 'Pending',
+    address VARCHAR(255) NOT NULL,
+    payment_mode VARCHAR(255) NOT NULL,
+    CONSTRAINT chk_total_price_positive CHECK (total_price >= 0),
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
+);
+
+
 -- SELECT host FROM mysql.user WHERE User = 'root';
 -- CREATE USER 'root'@'192.168.42.39' IDENTIFIED BY 'Niket@mac';
 -- GRANT ALL PRIVILEGES ON *.* TO 'root'@'192.168.42.39';

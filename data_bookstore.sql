@@ -200,7 +200,8 @@ INSERT INTO ProductReview (book_id, customer_id, rating, content) VALUES
 (17, 19, 5, 'Couldn''t recommend this book enough!'),
 (20, 20, 2, 'Struggled to connect with the story and characters.');
 
-
+INSERT INTO ProductReview (book_id, customer_id, rating, content) VALUES
+(20, 21, 2, 'Struggled to connect with the story and characters.');
 INSERT INTO MAIN_ADMIN (adminID, hashed_password) VALUES
 (1, 'Password1!'),
 (2, 'Secure@123'),
@@ -210,39 +211,29 @@ INSERT INTO MAIN_ADMIN (adminID, hashed_password) VALUES
 
 
 
-INSERT INTO Cart (cart_price, customer_id, book_id, quantity) VALUES
-(1500, 1, 1, 2),  -- Updated quantity to 2
-(1700, 2, 2, 3),  -- Updated quantity to 3
-(1800, 3, 3, 1),  -- Updated quantity to 1
-(1900, 4, 4, 4),  -- Updated quantity to 4
-(2000, 5, 5, 2),  -- Updated quantity to 2
-(1600, 6, 6, 3),  -- Updated quantity to 3
-(1750, 7, 7, 1),  -- Updated quantity to 1
-(1850, 8, 8, 2),  -- Updated quantity to 2
-(1950, 9, 9, 3),  -- Updated quantity to 3
-(2100, 10, 10, 4);  -- Updated quantity to 4
+
 
 
 -- Populating DAgentReview table with data
-INSERT INTO DAgentReview (daID, agent_review, agent_review_description, agent_review_date) VALUES
-(1, 4, 'Prompt and courteous service.', '2024-02-10'),
-(2, 5, 'Excellent communication and timely delivery.', '2024-02-11'),
-(3, 3, 'Satisfactory service but could be improved.', '2024-02-12'),
-(4, 4, 'Professional behavior and efficient service.', '2024-02-13'),
-(5, 5, 'Highly satisfied with the delivery agent.', '2024-02-14'),
-(6, 2, 'Delivery delayed without prior notice.', '2024-02-15'),
-(7, 4, 'Good service overall.', '2024-02-16'),
-(8, 3, 'Delivery agent was polite but delivery was late.', '2024-02-17'),
-(10, 4, 'Timely delivery and good communication.', '2024-02-19'),
-(11, 3, 'Average service, room for improvement.', '2024-02-20'),
-(12, 5, 'Exceptional service, highly recommended.', '2024-02-21'),
-(13, 2, 'Package arrived damaged, could improve handling.', '2024-02-22'),
-(14, 4, 'Professional behavior and timely delivery.', '2024-02-23'),
-(15, 5, 'Delivery agent went above and beyond expectations.', '2024-02-24'),
-(16, 3, 'Service was okay, could be better.', '2024-02-25'),
-(17, 4, 'No issues with the delivery, satisfied overall.', '2024-02-26'),
-(18, 5, 'Excellent service, would use again.', '2024-02-27'),
-(20, 4, 'Smooth and hassle-free delivery process.', '2024-02-29');
+INSERT INTO DAgentReview (daID, customer_id, agent_review, agent_review_description, agent_review_date) VALUES
+(1, 1, 4, 'Prompt and courteous service.', '2024-02-10'),
+(2, 2, 5, 'Excellent communication and timely delivery.', '2024-02-11'),
+(3, 3, 3, 'Satisfactory service but could be improved.', '2024-02-12'),
+(4, 4, 4, 'Professional behavior and efficient service.', '2024-02-13'),
+(5, 5, 5, 'Highly satisfied with the delivery agent.', '2024-02-14'),
+(6, 6, 2, 'Delivery delayed without prior notice.', '2024-02-15'),
+(7, 7, 4, 'Good service overall.', '2024-02-16'),
+(8, 8, 3, 'Delivery agent was polite but delivery was late.', '2024-02-17'),
+(10, 9, 4, 'Timely delivery and good communication.', '2024-02-19'),
+(11, 10, 3, 'Average service, room for improvement.', '2024-02-20'),
+(12, 11, 5, 'Exceptional service, highly recommended.', '2024-02-21'),
+(13, 12, 2, 'Package arrived damaged, could improve handling.', '2024-02-22'),
+(14, 13, 4, 'Professional behavior and timely delivery.', '2024-02-23'),
+(15, 14, 5, 'Delivery agent went above and beyond expectations.', '2024-02-24'),
+(16, 15, 3, 'Service was okay, could be better.', '2024-02-25'),
+(17, 16, 4, 'No issues with the delivery, satisfied overall.', '2024-02-26'),
+(18, 17, 5, 'Excellent service, would use again.', '2024-02-27'),
+(20, 21, 4, 'Smooth and hassle-free delivery process.', '2024-02-29');
 
 
 INSERT INTO BookDescription (book_id, book_description) VALUES
@@ -268,30 +259,6 @@ INSERT INTO BookDescription (book_id, book_description) VALUES
 (20, 'A touching family drama about the bonds that hold us together in times of adversity.');
 
 
-
-
--- Inserting data into OrderItem table
-INSERT INTO OrderItem (book_id, orderID, quantity) VALUES
-(1, 1, 2),  -- The Great Gatsby - Order 1 - Quantity: 2
-(2, 2, 1),  -- To Kill a Mockingbird - Order 2 - Quantity: 1
-(3, 3, 3),  -- 1984 - Order 3 - Quantity: 3
-(4, 4, 2),  -- Pride and Prejudice - Order 4 - Quantity: 2
-(5, 5, 1),  -- The Catcher in the Rye - Order 5 - Quantity: 1
-(6, 6, 2),  -- Brave New World - Order 6 - Quantity: 2
-(7, 7, 1),  -- To the Lighthouse - Order 7 - Quantity: 1
-(8, 8, 3),  -- Animal Farm - Order 8 - Quantity: 3
-(9, 9, 2),  -- The Lord of the Rings - Order 9 - Quantity: 2
-(10, 10, 1),  -- The Hobbit - Order 10 - Quantity: 1
-(11, 11, 2),  -- Harry Potter and the Philosopher's Stone - Order 11 - Quantity: 2
-(12, 12, 1),  -- Moby-Dick - Order 12 - Quantity: 1
-(13, 13, 3),  -- Ulysses - Order 13 - Quantity: 3
-(14, 14, 2),  -- The Odyssey - Order 14 - Quantity: 2
-(15, 15, 1),  -- Don Quixote - Order 15 - Quantity: 1
-(16, 16, 3),  -- War and Peace - Order 16 - Quantity: 3
-(17, 17, 2),  -- The Brothers Karamazov - Order 17 - Quantity: 2
-(18, 18, 1),  -- The Picture of Dorian Gray - Order 18 - Quantity: 1
-(19, 19, 2),  -- Alice's Adventures in Wonderland - Order 19 - Quantity: 2
-(20, 20, 3);  -- Frankenstein - Order 20 - Quantity: 3
 
 
 -- Inserting data into ISBNInfo table
