@@ -102,9 +102,11 @@ INSERT INTO Customer (customer_name, Address_ID, phone_number, email, customer_p
 ('Thomas Robinson', 17, 8901234566, 'thomas@example.com', 'password17', 31),
 ('Patricia Walker', 18, 9012345677, 'patricia@example.com', 'password18', 39),
 ('Matthew Hall', 19, 1234567898, 'matthew2@example.com', 'password19', 36),
+
 ('Karen Young', 20, 2345678909, 'karen@example.com', 'password20', 23);
 
-
+INSERT INTO Customer (customer_name, Address_ID, phone_number, email, customer_password, age) VALUES
+('Niket',19,8619631019,'niket@email.com','pass@123',19);
 
 INSERT INTO DeliveryAgent (da_name, da_password, availability, da_phone_no) VALUES
 ('John Smith', 'agentpassword1', 'Available', 1111111111),
@@ -176,27 +178,27 @@ INSERT INTO Orders (Order_status, orderDATE, totalPrice, customer_id) VALUES
 
 
 
-INSERT INTO ProductReview (book_id, rating, content) VALUES
-(1, 5, 'This book was fantastic! I couldn''t put it down.'),
-(1, 4, 'Enjoyed reading this book, although the ending felt rushed.'),
-(2, 2, 'The plot was interesting, but the writing style was not my favorite.'),
-(3, 5, 'Absolutely loved this book! Highly recommend it to everyone.'),
-(4, 2, 'Disappointed with this book. Expected more from the author.'),
-(5, 4, 'A gripping read with well-developed characters.'),
-(6, 5, 'One of the best books I''ve read this year!'),
-(7, 3, 'An okay read, but nothing memorable.'),
-(8, 5, 'Couldn''t stop reading until I finished!'),
-(9, 4, 'Solid book with an unexpected twist.'),
-(10, 2, 'Found it difficult to get into this book.'),
-(11, 5, 'Captivating storyline and beautifully written.'),
-(12, 3, 'Started off slow but picked up towards the end.'),
-(13, 4, 'Enjoyed the character development throughout.'),
-(14, 1, 'Didn''t enjoy this book at all. Not my cup of tea.'),
-(15, 5, 'A must-read for fans of the genre!'),
-(16, 4, 'Thoroughly enjoyed every page of this book.'),
-(17, 3, 'Had some good moments but overall fell short.'),
-(17, 5, 'Couldn''t recommend this book enough!'),
-(20, 2, 'Struggled to connect with the story and characters.');
+INSERT INTO ProductReview (book_id, customer_id, rating, content) VALUES
+(1, 1, 5, 'This book was fantastic! I couldn''t put it down.'),
+(1, 2, 4, 'Enjoyed reading this book, although the ending felt rushed.'),
+(2, 3, 2, 'The plot was interesting, but the writing style was not my favorite.'),
+(3, 4, 5, 'Absolutely loved this book! Highly recommend it to everyone.'),
+(4, 5, 2, 'Disappointed with this book. Expected more from the author.'),
+(5, 6, 4, 'A gripping read with well-developed characters.'),
+(6, 7, 5, 'One of the best books I''ve read this year!'),
+(7, 8, 3, 'An okay read, but nothing memorable.'),
+(8, 9, 5, 'Couldn''t stop reading until I finished!'),
+(9, 10, 4, 'Solid book with an unexpected twist.'),
+(10, 11, 2, 'Found it difficult to get into this book.'),
+(11, 12, 5, 'Captivating storyline and beautifully written.'),
+(12, 13, 3, 'Started off slow but picked up towards the end.'),
+(13, 14, 4, 'Enjoyed the character development throughout.'),
+(14, 15, 1, 'Didn''t enjoy this book at all. Not my cup of tea.'),
+(15, 16, 5, 'A must-read for fans of the genre!'),
+(16, 17, 4, 'Thoroughly enjoyed every page of this book.'),
+(17, 18, 3, 'Had some good moments but overall fell short.'),
+(17, 19, 5, 'Couldn''t recommend this book enough!'),
+(20, 20, 2, 'Struggled to connect with the story and characters.');
 
 
 INSERT INTO MAIN_ADMIN (adminID, hashed_password) VALUES

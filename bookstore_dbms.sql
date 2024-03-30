@@ -82,11 +82,14 @@ CREATE TABLE IF NOT EXISTS Orders (
 CREATE TABLE IF NOT EXISTS ProductReview (
     review_id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     book_id INT NOT NULL,
+    customer_id INT NOT NULL,  -- Added column for customer ID
     rating INT NOT NULL,
     content VARCHAR(255) NOT NULL,
     CONSTRAINT chk_vendor_rating_range CHECK (rating >= 0 AND rating <= 5),
-    FOREIGN KEY (book_id) REFERENCES Book(book_id)
+    FOREIGN KEY (book_id) REFERENCES Book(book_id),
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)  
 );
+
 
 -- Admin table
 CREATE TABLE IF NOT EXISTS MAIN_ADMIN (
@@ -115,10 +118,12 @@ CREATE TABLE IF NOT EXISTS Cart (
 CREATE TABLE IF NOT EXISTS DAgentReview (
     da_review_id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     daID INT NOT NULL,
-    agent_review INT CHECK (agent_review BETWEEN 1 AND 5), -- Check constraint for agent review between 1 and 5
+    customer_id INT NOT NULL,  
+    agent_review INT CHECK (agent_review BETWEEN 1 AND 5),
     agent_review_description VARCHAR(512),
     agent_review_date VARCHAR(50) NOT NULL,
-    FOREIGN KEY (daID) REFERENCES DeliveryAgent(daID)
+    FOREIGN KEY (daID) REFERENCES DeliveryAgent(daID),
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)  -- Added foreign key constraint for customer ID
 );
 
 
@@ -158,9 +163,13 @@ CREATE TABLE IF NOT EXISTS StockQuantity (
     PRIMARY KEY (stock_quantity_id, isbn_id),
     FOREIGN KEY (isbn_id) REFERENCES ISBNInfo(isbn_id)
 );
+-- SELECT host FROM mysql.user WHERE User = 'root';
+-- CREATE USER 'root'@'192.168.42.39' IDENTIFIED BY 'Niket@mac';
+-- GRANT ALL PRIVILEGES ON *.* TO 'root'@'192.168.42.39';
 
-GRANT ALL PRIVILEGES ON *.* TO 'new_user'@'Nikets-MacBook-Air.local' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
+-- CREATE USER 'root'@'%' IDENTIFIED BY 'Niket@mac';
+-- GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
 
-
+-- GRANT ALL PRIVILEGES ON bookshop.* TO 'root'@'192.168.42.39';
+-- FLUSH PRIVILEGES;
 
