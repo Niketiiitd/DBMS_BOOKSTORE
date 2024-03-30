@@ -4,11 +4,172 @@ mydb = mysql.connector.connect(
     host="Nikets-MacBook-Air.local",
     user="root",
     password="Niket@mac",
-    database="bookshop",  # Specify the database
+    database="bookshop", 
     auth_plugin='mysql_native_password'
 )
 
 cursor = mydb.cursor()
+
+def customer_signup():
+    print("Customer Signup")
+    name = input("Enter your name: ")
+
+    # Validate house number input
+    while True:
+        try:
+            house_no = int(input("Enter your house number: "))
+            break
+        except ValueError:
+            print("Please enter a valid house number (numeric value).")
+
+    street_name = input("Enter your street name: ")
+    city = input("Enter your city: ")
+    state = input("Enter your state: ")
+    zip_code = input("Enter your ZIP code: ")
+
+    # Validate ZIP code input
+    while True:
+        try:
+            zip_code = int(zip_code)
+            break
+        except ValueError:
+            print("Please enter a valid ZIP code (numeric value).")
+            zip_code = input("Enter your ZIP code: ")
+
+    phone_number = input("Enter your phone number: ")
+    email = input("Enter your email: ")
+    password = input("Enter your password: ")
+
+    # Validate age input
+    while True:
+        try:
+            age = int(input("Enter your age: "))
+            break
+        except ValueError:
+            print("Please enter a valid age (numeric value).")
+
+    try:
+        cursor.execute("INSERT INTO Address (House_NO, Street_Name, City, State, Zip) VALUES (%s, %s, %s, %s, %s)",
+                       (house_no, street_name, city, state, zip_code))
+        mydb.commit()
+
+        address_id = cursor.lastrowid
+
+        cursor.execute("INSERT INTO Customer (customer_name, Address_ID, phone_number, email, customer_password, age) VALUES (%s, %s, %s, %s, %s, %s)",
+                       (name, address_id, phone_number, email, password, age))
+        mydb.commit()
+
+        print("Customer signup successful!")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+
+def vendor_signup():
+    print("Vendor Signup")
+    name = input("Enter vendor name: ")
+    email = input("Enter email: ")
+    
+    # Validate age input
+    while True:
+        try:
+            age = int(input("Enter age: "))
+            break
+        except ValueError:
+            print("Please enter a valid age (numeric value).")
+
+    phone_number = input("Enter phone number: ")
+    
+    # Validate phone number input
+    while True:
+        try:
+            phone_number = int(phone_number)
+            break
+        except ValueError:
+            print("Please enter a valid phone number (numeric value).")
+            phone_number = input("Enter phone number: ")
+    
+    try:
+        cursor.execute("INSERT INTO Vendor (vendor_name, Email, Age, Phone_number) VALUES (%s, %s, %s, %s)",
+                       (name, email, age, phone_number))
+        mydb.commit()
+        print("Vendor signup successful!")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+
+
+def delivery_agent_signup():
+    print("Delivery Agent Signup")
+    name = input("Enter delivery agent name: ")
+    password = input("Enter password: ")
+    availability = input("Enter availability (Available/Unavailable): ")
+    phone_number = input("Enter phone number: ")
+    
+    # Validate phone number input
+    while True:
+        try:
+            phone_number = int(phone_number)
+            break
+        except ValueError:
+            print("Please enter a valid phone number (numeric value).")
+            phone_number = input("Enter phone number: ")
+    
+    try:
+        cursor.execute("INSERT INTO DeliveryAgent (da_name, da_password, availability, da_phone_no) VALUES (%s, %s, %s, %s)",
+                       (name, password, availability, phone_number))
+        mydb.commit()
+        print("Delivery agent signup successful!")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+
+
+def admin_signup():
+    print("Admin Signup")
+    admin_id = input("Enter admin ID: ")
+    password = input("Enter password: ")
+    
+    # Validate admin ID input
+    while True:
+        try:
+            admin_id = int(admin_id)
+            break
+        except ValueError:
+            print("Please enter a valid admin ID (numeric value).")
+            admin_id = input("Enter admin ID: ")
+    
+    try:
+        cursor.execute("INSERT INTO MAIN_ADMIN (adminID, hashed_password) VALUES (%s, %s)",
+                       (admin_id, password))
+        mydb.commit()
+        print("Admin signup successful!")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+
+
+# Signup function
+def signup():
+    while True:
+        print("\nSignup as:")
+        print("1. Customer")
+        print("2. Vendor")
+        print("3. Delivery Agent")
+        print("4. Admin")
+        print("5. Exit")
+        choice = int(input("Enter your choice: "))
+        
+        if choice == 1:
+            customer_signup()
+        elif choice == 2:
+            vendor_signup()
+        elif choice == 3:
+            delivery_agent_signup()
+        elif choice == 4:
+            admin_signup()
+        elif choice == 5:
+            print("Exiting signup...")
+            break
+        else:
+            print("Invalid choice. Please enter a valid option.")
+    homepage()
+
 
 def login():
     while True:
@@ -22,10 +183,10 @@ def login():
         choice = int(input())
         
         if choice == 1:
-            # Customer login
+
             cust_number = input("Enter Customer Phone number: ")
             
-            # Check phone number length
+        
             if len(cust_number) != 10:
                 print("Incorrect length of phone number. Please enter a 10-digit phone number.")
                 continue
@@ -102,6 +263,8 @@ def login():
         elif choice == 5:
             
             break
+    homepage()
+    
 
 def CustomerCommands(customer_number):
     
@@ -499,7 +662,24 @@ def DeliveryAgentCommands():
 def AdminCommands():
     print("hello")
 
-login()
+# login()
+
+def homepage():
+    while True:
+        print("1.Signup")
+        print("2.Login")
+        print("3.Exit")
+        choice = int(input("Enter your choice: "))
+            
+        if choice == 1:
+            signup()
+        elif choice==2:
+            login()
+        elif choice==3:
+            break
+        else:
+            print("Invalid choice. Please enter a valid option.")
+homepage()   
 
 # def print_all_vendors():
 #     # Execute SQL query to fetch all vendors
