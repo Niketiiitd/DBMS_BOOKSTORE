@@ -159,4 +159,8 @@ CREATE TABLE IF NOT EXISTS StockQuantity (
     FOREIGN KEY (isbn_id) REFERENCES ISBNInfo(isbn_id)
 );
 
+GRANT ALL PRIVILEGES ON *.* TO 'new_user'@'Nikets-MacBook-Air.local' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+
 

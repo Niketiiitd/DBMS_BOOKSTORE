@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
@@ -6,21 +6,18 @@ app = Flask(__name__)
 # def index():
 #     return render_template('index.html')
 
-@app.route('/', methods=['POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    user_type = request.form['user_type']
-    if user_type == 'customer':
-        username = request.form['customer_id']
-        password = request.form['password']
-        customer = validate_customer(username, password)
-        if customer:
-            return redirect(url_for('customer_dashboard'))
-        else:
-            flash('Invalid username or password')
-    elif user_type == 'supplier':
-        return redirect(url_for('supplier_dashboard'))
-    else:
-        return "Invalid user type"
+    if request.method == "POST":
+        user_type = request.form.get("user_type")
+        if user_type == "customer":
+            return redirect(url_for("customer"))
+        # Add similar conditions for other user types if needed
+    return render_template('login_signup.html')
+
+@app.route("/customer")
+def customer():
+    return render_template('customer.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

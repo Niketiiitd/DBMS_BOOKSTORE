@@ -27,7 +27,7 @@ INSERT INTO Address (House_NO, Street_Name, City, State, Zip) VALUES
 
 
 INSERT INTO Vendor (vendor_name, Email, Age, Phone_number) VALUES
-('Oliver', 'oliver@example.com', 35, 1234567891),
+('Oliver', 'oliverrr@example.com', 35, 1234567896),
 ('June', 'june@example.com', 40, 2345678901),
 ('Agust', 'agust@example.com', 45, 3456789012),
 ('Sophia', 'sophia@example.com', 50, 4567890123),
