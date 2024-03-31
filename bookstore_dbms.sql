@@ -16,8 +16,15 @@ CREATE TABLE IF NOT EXISTS Vendor (
     VendorID INT AUTO_INCREMENT PRIMARY KEY,
     vendor_name VARCHAR(255) NOT NULL,
     Email VARCHAR(255) unique NOT NULL,
-    Age INT,
-    Phone_number BIGINT unique
+    Age INT NOT NULL,
+    Phone_number BIGINT UNIQUE NOT NULL,
+    vendor_password VARCHAR(255) NOT NULL,
+	vendor_banned BOOLEAN DEFAULT 0,
+    vendor_incorrect_attempts INT DEFAULT 0,
+    CONSTRAINT chk_vendor_phone CHECK (Phone_number > 0 AND Phone_number <= 9999999999),
+    CONSTRAINT chk_vendor_email CHECK (Email LIKE '%@%'),
+    CONSTRAINT chk_password_length CHECK (LENGTH(vendor_password) >= 6),
+
 );
 
 -- Book table
