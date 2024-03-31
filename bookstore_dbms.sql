@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS Customer (
     email VARCHAR(255) UNIQUE NOT NULL,
     customer_password VARCHAR(255) NOT NULL,
     age INT NOT NULL,
+    is_banned BOOLEAN DEFAULT 0,
+    incorrect_attempts INT DEFAULT 0,
     CONSTRAINT chk_person_phone CHECK (phone_number > 0 AND phone_number <= 9999999999),
     CONSTRAINT chk_person_email CHECK (email LIKE '%@%'),
     CONSTRAINT chk_person_password_length CHECK (LENGTH(customer_password) >= 6),
@@ -134,6 +136,18 @@ CREATE TABLE IF NOT EXISTS BookDescription (
     book_description VARCHAR(512),
     FOREIGN KEY (book_id) REFERENCES Book(book_id)
 );
+CREATE TABLE IF NOT EXISTS customer_order (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    customer_id INT NOT NULL,
+    total_price BIGINT NOT NULL,
+    order_status VARCHAR(255) NOT NULL DEFAULT 'Pending',
+    address VARCHAR(255) NOT NULL,
+    payment_mode VARCHAR(255) NOT NULL,
+    CONSTRAINT chk_total_price_positive CHECK (total_price >= 0),
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
+);
+
 
 CREATE TABLE IF NOT EXISTS OrderItem (
     order_item_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -164,17 +178,6 @@ CREATE TABLE IF NOT EXISTS StockQuantity (
     FOREIGN KEY (isbn_id) REFERENCES ISBNInfo(isbn_id)
 );
 
-CREATE TABLE IF NOT EXISTS customer_order (
-    order_id INT AUTO_INCREMENT PRIMARY KEY,
-    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    customer_id INT NOT NULL,
-    total_price BIGINT NOT NULL,
-    order_status VARCHAR(255) NOT NULL DEFAULT 'Pending',
-    address VARCHAR(255) NOT NULL,
-    payment_mode VARCHAR(255) NOT NULL,
-    CONSTRAINT chk_total_price_positive CHECK (total_price >= 0),
-    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
-);
 
 
 -- SELECT host FROM mysql.user WHERE User = 'root';

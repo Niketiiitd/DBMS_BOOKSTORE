@@ -183,30 +183,52 @@ def login():
         choice = int(input())
         
         if choice == 1:
-
             cust_number = input("Enter Customer Phone number: ")
-            
-        
+
             if len(cust_number) != 10:
                 print("Incorrect length of phone number. Please enter a 10-digit phone number.")
                 continue
             
+            # Check if the account is banned
+            cursor.execute("SELECT is_banned FROM Customer WHERE phone_number = %s", (cust_number,))
+            is_banned_result = cursor.fetchone()
+            
+            if is_banned_result and is_banned_result[0]:  # If the account is banned
+                print("Your account has been suspended! Please contact admin to continue.")
+                continue  # Skip login attempt
+                
             cust_pass = input("Enter Customer Password: ")
+            # Counter for incorrect password attempts
+            incorrect_attempts = 0
             
             # Execute SQL query to check if customer exists
-            cursor.execute("SELECT customer_password FROM Customer WHERE phone_number = %s", (cust_number,))
+            cursor.execute("SELECT customer_password, incorrect_attempts FROM Customer WHERE phone_number = %s", (cust_number,))
             result = cursor.fetchone()
             
             if result:
-                db_cust_pass = result[0]  # Fetch the password from the database
-                if db_cust_pass == cust_pass:
+                db_cust_pass, db_incorrect_attempts = result  # Fetch the password and incorrect attempts from the database
+                while cust_pass != db_cust_pass:
+                    incorrect_attempts += 1
+                    if incorrect_attempts >= 3:
+                        print("Too many incorrect attempts. Your account has been suspended! Please contact admin to continue.")
+                        # Logic to ban the account in the database
+                        cursor.execute("UPDATE Customer SET is_banned = 1 WHERE phone_number = %s", (cust_number,))
+                        # connection.commit()
+                        break
+                    print("Wrong Password! Please try again.")
+                    cust_pass = input("Enter Customer Password: ")
+                
+                # Update the incorrect attempts in the database
+                new_incorrect_attempts = db_incorrect_attempts + incorrect_attempts
+                cursor.execute("UPDATE Customer SET incorrect_attempts = %s WHERE phone_number = %s", (new_incorrect_attempts, cust_number))
+                # connection.commit()
+                
+                if incorrect_attempts < 3:
                     print("Customer Login Successful!")
                     CustomerCommands(cust_number)
-                else:
-                    print("Wrong Password!")
             else:
                 print("No such customer found!")
-        
+
         elif choice == 2:
             # Vendor login
             vendor_email = input("Enter Vendor Email: ")
@@ -758,7 +780,7 @@ def VendorCommands():
                     print("Series:", book[4])
                     print("Publication:", book[5])
                     print("Availability:", book[6])
-                   # print("Vendor ID:", book[7])
+                    print("Vendor ID:", book[7])
                     print("Price:", book[7])
                     print() 
             else:
@@ -780,7 +802,7 @@ def VendorCommands():
 
             print("Book added successfully")
         
-         elif choice == '4':
+        elif choice == '4':
             # Delete a book
             book_id_to_delete = int(input("Enter the ID of the book you want to delete: "))
             cursor.execute("SELECT * FROM Book WHERE book_id = %s AND VendorID = %s", (book_id_to_delete, vendor_id))
