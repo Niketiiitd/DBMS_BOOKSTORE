@@ -356,20 +356,22 @@ def CustomerCommands(customer_number):
         print("8. Show DA_Agent reviews given by you")
         print("9. Place order")
         print("10. Clear current cart ")
-        print("11. Logout")
+        print("11. Know more about any book")
+        print("12. Give book reviews")
+        print("13. Logout")
         
         # Prompt user for choice
         choice = int(input("Enter your choice: "))
-        
+        # delete_customer_carts(cursor, cust_id)
         if choice == 1:
-            # Execute SQL query to fetch all books
-            cursor.execute("SELECT * FROM Book")
-            books = cursor.fetchall()
+            # Execute SQL query to fetch all books and their reviews
+            cursor.execute("SELECT b.*, r.rating, r.content FROM Book b LEFT JOIN ProductReview r ON b.book_id = r.book_id")
+            books_with_reviews = cursor.fetchall()
             
-            # Display fetched books
-            if books:
+            # Display fetched books and their reviews
+            if books_with_reviews:
                 print("All Books:")
-                for book in books:
+                for book in books_with_reviews:
                     print("Book ID:", book[0])
                     print("Title:", book[1])
                     print("Author:", book[2])
@@ -379,10 +381,12 @@ def CustomerCommands(customer_number):
                     print("Availability:", book[6])
                     print("Vendor ID:", book[7])
                     print("Price:", book[8])
+                    print("Rating:", book[9])  
+    
                     print()
             else:
                 print("No books found in the database.")
-        
+
         # Add logic for other choices as needed
         elif choice == 2:
             # Search logic
@@ -568,7 +572,7 @@ def CustomerCommands(customer_number):
                     total_value += total_item_value
                     print("Book ID:", book_id)
                     print("Quantity:", quantity)
-                    print("Item Value:", total_item_value)
+                    print("Item Value:", price)
                     print()
                 print("Total Cart Value:", total_value)
             else:
@@ -632,18 +636,25 @@ def CustomerCommands(customer_number):
                 
         elif choice == 9:
             # Place order logic
+            cursor.execute("SELECT * FROM Cart WHERE customer_id = %s", (cust_id,))
+            cart_items = cursor.fetchall()
             unavailable_books = check_cart_availability(cursor, cart_items)
             if unavailable_books:
                 print("The following books are not available in the selected quantity:")
                 for book in unavailable_books:
                     print(f"Book: {book[0]}, Requested Quantity: {book[1]}, Available Quantity: {book[2]}")
                 print("Please update your cart accordingly.")
+                cursor.execute("DELETE * FROM Cart WHERE customer_id = %s", (cust_id,))
+                mydb.commit()
+                print("Your cart has been cleared.")
+                
             else:
                 cursor.execute("SELECT * FROM Cart WHERE customer_id = %s", (cust_id,))
                 cart_items = cursor.fetchall()
 
                 if not cart_items:
                     print("Your cart is empty. Please add items to your cart before placing an order.")
+                    continue
                 else:
                     # Display cart items
                     # print("Your Cart:")
@@ -725,10 +736,84 @@ def CustomerCommands(customer_number):
                 print("Your order has been successfully placed. Thank you for shopping with us!")
 
         elif choice == 10:
+            # Delete the existing cart for the customer
             cursor.execute("DELETE FROM Cart WHERE customer_id = %s", (cust_id,))
             mydb.commit()
-            print("Your cart has been cleared.")
-        elif choice == 11:
+
+            # Create a new cart for the customer
+            cursor.execute("INSERT INTO Cart (customer_id) VALUES (%s)", (cust_id,))
+            mydb.commit()
+
+            print("Your cart has been cleared and a new cart has been created.")
+
+        if choice == 11:
+            # Ask for book ID
+            book_id = int(input("Enter the Book ID: "))
+            
+            # Fetch book details and description
+            cursor.execute("SELECT b.*, bd.book_description FROM Book b LEFT JOIN BookDescription bd ON b.book_id = bd.book_id WHERE b.book_id = %s", (book_id,))
+            book_details = cursor.fetchone()
+            
+            if book_details:
+                print("Book Details:")
+                print("Book ID:", book_details[0])
+                print("Title:", book_details[1])
+                print("Author:", book_details[2])
+                print("Genre:", book_details[3])
+                print("Series:", book_details[4])
+                print("Publication:", book_details[5])
+                print("Availability:", book_details[6])
+                print("Vendor ID:", book_details[7])
+                print("Price:", book_details[8])
+                print("Description:", book_details[9])  # Index 9 corresponds to book description
+                print()
+                
+                # Fetch and display reviews
+                cursor.execute("SELECT rating, content FROM ProductReview WHERE book_id = %s", (book_id,))
+                reviews = cursor.fetchall()
+                
+                if reviews:
+                    print("Reviews:")
+                    for review in reviews:
+                        print("Rating:", review[0])
+                        print("Content:", review[1])
+                        print()
+                else:
+                    print("No reviews found for this book.")
+            else:
+                print("Book not found.")
+                
+        if choice == 12:
+            # Fetch orders placed by the customer
+            cursor.execute("SELECT order_id FROM customer_order WHERE customer_id = %s", (cust_id,))
+            orders = cursor.fetchall()
+
+            if orders:
+                print("Your Orders:")
+                for order in orders:
+                    order_id = order[0]
+                    # Fetch books purchased in each order
+                    cursor.execute("SELECT b.book_id, b.book_title FROM OrderItem oi JOIN Book b ON oi.book_id = b.book_id WHERE oi.order_id = %s", (order_id,))
+                    books_in_order = cursor.fetchall()
+                    
+                    if books_in_order:
+                        print(f"Order ID: {order_id}")
+                        print("Books Purchased:")
+                        for book in books_in_order:
+                            print(f"Book ID: {book[0]}, Title: {book[1]}")
+                            # Prompt for review
+                            rating = int(input("Enter rating (0-5): "))
+                            content = input("Enter review content: ")
+                            
+                            # Insert review into ProductReview table
+                            cursor.execute("INSERT INTO ProductReview (book_id, customer_id, rating, content) VALUES (%s, %s, %s, %s)", (book[0], cust_id, rating, content))
+                            mydb.commit()
+                    else:
+                        print(f"No books found for Order ID: {order_id}")
+            else:
+                print("You haven't placed any orders yet.")
+        
+        elif choice == 13:
             # Logout logic
             print("Signing out...")
             break
@@ -736,6 +821,185 @@ def CustomerCommands(customer_number):
         else:
             print("Invalid choice. Please enter a valid option.")
     login()
+    
+def VendorCommands():
+    while True:
+        cursor.execute("SELECT vendor_id FROM Vendor WHERE phone_number = %s", (vendor_number,))
+        vendor_id = cursor.fetchone()[0]  # Assuming phone_number uniquely identifies a vendor
+        
+        print("1. View Vendor Books")
+        print("2. Search")
+        print("3. Add book")
+        print("4. Delete book")
+        print("5. Edit book stock")
+        print("6. Show your personal details")
+        print("7. Logout")
+        
+        choice = input("Enter your choice: ")
+        
+        if choice == '1':
+            cursor.execute("SELECT * FROM Book WHERE VendorID = %s", (vendor_id,))
+            books = cursor.fetchall()
+            if books:
+                print("All Books:")
+                for book in books:
+                    print("Book ID:", book[0])
+                    print("Title:", book[1])
+                    print("Author:", book[2])
+                    print("Genre:", book[3])
+                    print("Series:", book[4])
+                    print("Publication:", book[5])
+                    print("Availability:", book[6])
+                    print("Price:", book[7])
+                    print()
+            else:
+                print("No books found in the database.")
+        
+        elif choice == '2':
+            # Search logic
+            search_filters = {}
+            
+            # Ask user for search filters
+            book_id = input("Enter Book ID (press Enter to skip): ")
+            if book_id:
+                search_filters['book_id'] = book_id
+            
+            title = input("Enter Title (press Enter to skip): ")
+            if title:
+                search_filters['book_title'] = title  # Corrected column name
+                
+            author = input("Enter Author (press Enter to skip): ")
+            if author:
+                search_filters['book_author'] = author  # Corrected column name
+                
+            genre = input("Enter Genre (press Enter to skip): ")
+            if genre:
+                search_filters['book_genre'] = genre
+            
+            series = input("Enter Series (press Enter to skip): ")
+            if series:
+                search_filters['book_series'] = series
+            
+            publication = input("Enter Publication (press Enter to skip): ")
+            if publication:
+                search_filters['book_publication'] = publication
+            
+            availability = input("Enter Availability (press Enter to skip): ")
+            if availability:
+                search_filters['book_availability'] = availability
+            
+            # vendor_id = input("Enter Vendor ID (press Enter to skip): ")
+            # if vendor_id:
+            #     search_filters['VendorID'] = vendor_id  # Corrected column name
+            
+            price = input("Enter Price (press Enter to skip): ")
+            if price:
+                # Construct filter for price lower than entered
+                search_filters['book_price'] = price   # Corrected column name and added comparison operator
+                
+            
+            # Construct SQL query based on provided filters
+            sql_query = "SELECT * FROM Book JOIN Vendor ON Book.VendorID = Vendor.VendorID WHERE Vendor.VendorID = %s", (VendorID,)
+            conditions = []
+            for key, value in search_filters.items():
+                if key == 'book_price':
+                    conditions.append(f"{key} < {value}")
+                else:
+                    
+                    conditions.append(f"{key} = '{value}'")
+            
+            # Join conditions using 'OR' operator
+            sql_query += " OR ".join(conditions)
+            print(sql_query)
+            # Execute SQL query
+            cursor.execute(sql_query)
+            search_results = cursor.fetchall()
+
+            
+            # Display search results
+            if search_results:
+                print("Search Results:")
+                for book in search_results:
+                    print("Book ID:", book[0])
+                    print("Title:", book[1])
+                    print("Author:", book[2])
+                    print("Genre:", book[3])
+                    print("Series:", book[4])
+                    print("Publication:", book[5])
+                    print("Availability:", book[6])
+                    print("Vendor ID:", book[7])
+                    print("Price:", book[7])
+                    print() 
+            else:
+                print("No books found matching the provided criteria.")
+            
+        elif choice == '3':
+            # Add a book
+            title = input("Enter Title: ")
+            author = input("Enter Author: ")
+            genre = input("Enter Genre: ")
+            series = input("Enter Series: ")
+            publication = input("Enter Publication: ")
+            stock = int(input("Enter Availability: "))
+            price = int(input("Enter Price: "))
+
+            cursor.execute("INSERT INTO Book (book_title, book_author, book_genre, book_series, book_publication, book_availability, VendorID, book_price) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                           (title, author, genre, series, publication, stock, vendor_id, price))
+            mydb.commit()
+
+            print("Book added successfully")
+        
+        elif choice == '4':
+            # Delete a book
+            book_id_to_delete = int(input("Enter the ID of the book you want to delete: "))
+            cursor.execute("SELECT * FROM Book WHERE book_id = %s AND VendorID = %s", (book_id_to_delete, vendor_id))
+            book = cursor.fetchone()
+            if book:
+                cursor.execute("DELETE FROM Book WHERE book_id = %s", (book_id_to_delete,))
+                mydb.commit()
+                print("Book deleted successfully.")
+            else:
+                print("Invalid Book ID or book belongs to another vendor.")
+            
+        elif choice == '5':
+            # Edit book stock
+            book_id_to_edit = int(input("Enter the ID of the book you want to edit: "))
+            new_stock = int(input("Enter the new stock for the book: "))
+            cursor.execute("SELECT * FROM Book WHERE book_id = %s AND VendorID = %s", (book_id_to_edit, vendor_id))
+            book = cursor.fetchone()
+            if book:
+                cursor.execute("UPDATE Book SET book_availability = %s WHERE book_id = %s", (new_stock, book_id_to_edit))
+                mydb.commit()
+                print("Book stock updated successfully.")
+            else:
+                print("Invalid Book ID or  book belongs to another vendor.")
+        
+       
+            
+        elif choice == '6':
+            # Show vendor's personal details
+            cursor.execute("SELECT * FROM Vendor WHERE vendor_id = %s", (vendor_id,))
+            vendor_info = cursor.fetchone()
+            if vendor_info:
+                print("Personal Information:")
+                print("Vendor ID:", vendor_info[0])
+                print("Vendor Name:", vendor_info[1])
+                print("Email:", vendor_info[2])
+                print("Age:", vendor_info[3])
+                print("Phone Number:", vendor_info[4])
+
+            else:
+                print("Vendor not found.")
+        
+        elif choice == '7':
+            print("Logging out...")
+            break
+        
+        else:
+            continue
+    
+    login()
+    
     
 def VendorCommands():
     while True:
