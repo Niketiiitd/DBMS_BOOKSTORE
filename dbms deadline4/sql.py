@@ -1195,7 +1195,7 @@ def DeliveryAgentCommands():
     while True:
         try:
             agent_id = int(input("Enter Delivery Agent ID: "))
-            cursor.execute("SELECT * FROM DeliveryAgent WHERE agent_id = %s", (agent_id,))
+            cursor.execute("SELECT * FROM DeliveryAgent WHERE daID = %s", (agent_id,))
             agent = cursor.fetchone()
 
             if not agent:
@@ -1227,7 +1227,7 @@ def DeliveryAgentCommands():
             
             elif choice == '2':
                 availability = input("Enter your availability (e.g., 'Available' or 'Unavailable'): ")
-                cursor.execute("UPDATE DeliveryAgent SET availability = %s WHERE agent_id = %s", (availability, agent_id))
+                cursor.execute("UPDATE DeliveryAgent SET availability = %s WHERE daID = %s", (availability, agent_id))
                 mydb.commit() 
                 print("Availability updated successfully.")
 
@@ -1236,13 +1236,13 @@ def DeliveryAgentCommands():
                 
                 cursor.execute("ALTER TABLE DeliveryAgent ADD IF NOT EXISTS area_servicing VARCHAR(255)")
                 
-                cursor.execute("UPDATE DeliveryAgent SET area_servicing = %s WHERE agent_id = %s", (area_servicing, agent_id))
+                cursor.execute("UPDATE DeliveryAgent SET area_servicing = %s WHERE daID = %s", (area_servicing, agent_id))
                 mydb.commit()
                 
                 print("Area servicing updated successfully.")
 
             elif choice == '4':
-                cursor.execute("SELECT * FROM Orders WHERE delivery_agent_id = %s AND delivery_status = 'In transit'", (agent_id,))
+                cursor.execute("SELECT * FROM Orders WHERE daID = %s AND delivery_status = 'In transit'", (agent_id,))
                 current_orders = cursor.fetchone()
                 print("Order ID",current_orders[0])
                 print("Order Status",current_orders[1])
@@ -1250,7 +1250,7 @@ def DeliveryAgentCommands():
                 print("Customer ID",current_orders[4])
 
             elif choice == '5':
-                cursor.execute("SELECT * FROM Orders WHERE delivery_agent_id = %s AND (delivery_status = 'Delivered' OR delivery_status = 'Cancelled')", (agent_id,))
+                cursor.execute("SELECT * FROM Orders WHERE daID = %s AND (delivery_status = 'Delivered' OR delivery_status = 'Cancelled')", (agent_id,))
                 past_orders= cursor.fetchone()
                 print("Order ID", past_orders[0])
                 print("Order Status",past_orders[1])
