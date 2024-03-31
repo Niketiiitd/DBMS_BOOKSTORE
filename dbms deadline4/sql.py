@@ -916,7 +916,84 @@ def VendorCommands():
     login()
     
 def DeliveryAgentCommands():
-    print("hello")
+    while True:
+        try:
+            agent_id = int(input("Enter Delivery Agent ID: "))
+            cursor.execute("SELECT * FROM DeliveryAgent WHERE agent_id = %s", (agent_id,))
+            agent = cursor.fetchone()
+
+            if not agent:
+                print("Delivery agent not found.")
+                return
+            
+            print("Delivery Agent Commands:")
+            print("1. Personal Details")
+            print("2. Availability")
+            print("3. Area Servicing")
+            print("4. Orders: Current")
+            print("5. Orders: Past")
+            print("6. Logout")
+
+            choice = input("Enter your choice: ")
+
+            if choice == '1':
+                cursor.execute("SELECT * FROM DeliveryAgent WHERE daID = %s", (agent_id,))
+                agent_info = cursor.fetchone()
+                if agent_info:
+                    print("Personal Information:")
+                    print("Vendor ID:", agent_info[0])
+                    print("Vendor Name:", agent_info[1])
+                    #print("Email:", vendor_info[2])
+                    print("Availability:", agent_info[3])
+                    print("Phone Number:", agent_info[4])
+
+                else:
+                    print("Vendor not found.")
+            
+            elif choice == '2':
+                availability = input("Enter your availability (e.g., 'Available' or 'Unavailable'): ")
+                cursor.execute("UPDATE DeliveryAgent SET availability = %s WHERE agent_id = %s", (availability, agent_id))
+                mydb.commit() 
+                print("Availability updated successfully.")
+
+            elif choice == '3':
+                area_servicing = input("Enter the area you are servicing: ")
+                
+                # Add the area_servicing column to the DeliveryAgent table
+                cursor.execute("ALTER TABLE DeliveryAgent ADD IF NOT EXISTS area_servicing VARCHAR(255)")
+                
+                # Update the area_servicing value for the specific agent
+                cursor.execute("UPDATE DeliveryAgent SET area_servicing = %s WHERE agent_id = %s", (area_servicing, agent_id))
+                mydb.commit()
+                
+                print("Area servicing updated successfully.")
+
+            elif choice == '4':
+                cursor.execute("SELECT * FROM Orders WHERE delivery_agent_id = %s AND delivery_status = 'In transit'", (agent_id,))
+                current_orders = cursor.fetchall()
+                print("Order ID",current_orders[0])
+                print("Order Status",current_orders[1])
+                print("Order Date",current_orders[2])
+                print("Customer ID",current_orders[4])
+
+            elif choice == '5':
+                cursor.execute("SELECT * FROM Orders WHERE delivery_agent_id = %s AND (delivery_status = 'Delivered' OR delivery_status = 'Cancelled')", (agent_id,))
+                past_orders= cursor.fetchall()
+                print("Order ID", past_orders[0])
+                print("Order Status",past_orders[1])
+                print("Order Date",past_orders[2])
+                print("Customer ID",past_orders[4])
+
+            elif choice == '6':
+                print("Logging out...")
+                break
+
+            else:
+                print("Invalid choice. Please enter a valid option.")
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            break
     
 def AdminCommands():
     print("hello")
