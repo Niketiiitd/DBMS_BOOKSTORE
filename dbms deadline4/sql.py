@@ -654,7 +654,170 @@ def CustomerCommands(customer_number):
     login()
     
 def VendorCommands():
-    print("Hello")
+    while True:
+        cursor.execute("SELECT vendor_id FROM Vendor WHERE phone_number = %s", (vendor_number,))
+        vendor_id = cursor.fetchone()[0]  # Assuming phone_number uniquely identifies a vendor
+        
+        print("1. View Vendor Books")
+        print("2. Search")
+        print("3. Add book")
+        print("4. Delete book")
+        print("5. Edit book stock")
+        print("6. Show your personal details")
+        print("7. Logout")
+        
+        choice = input("Enter your choice: ")
+        
+        if choice == '1':
+            cursor.execute("SELECT * FROM Book WHERE VendorID = %s", (vendor_id,))
+            books = cursor.fetchall()
+            if books:
+                print("All Books:")
+                for book in books:
+                    print("Book ID:", book[0])
+                    print("Title:", book[1])
+                    print("Author:", book[2])
+                    print("Genre:", book[3])
+                    print("Series:", book[4])
+                    print("Publication:", book[5])
+                    print("Availability:", book[6])
+                    print("Price:", book[7])
+                    print()
+            else:
+                print("No books found in the database.")
+        
+        elif choice == '2':
+            # Search logic
+            search_filters = {}
+            
+            # Ask user for search filters
+            book_id = input("Enter Book ID (press Enter to skip): ")
+            if book_id:
+                search_filters['book_id'] = book_id
+            
+            title = input("Enter Title (press Enter to skip): ")
+            if title:
+                search_filters['book_title'] = title  # Corrected column name
+                
+            author = input("Enter Author (press Enter to skip): ")
+            if author:
+                search_filters['book_author'] = author  # Corrected column name
+                
+            genre = input("Enter Genre (press Enter to skip): ")
+            if genre:
+                search_filters['book_genre'] = genre
+            
+            series = input("Enter Series (press Enter to skip): ")
+            if series:
+                search_filters['book_series'] = series
+            
+            publication = input("Enter Publication (press Enter to skip): ")
+            if publication:
+                search_filters['book_publication'] = publication
+            
+            availability = input("Enter Availability (press Enter to skip): ")
+            if availability:
+                search_filters['book_availability'] = availability
+            
+            # vendor_id = input("Enter Vendor ID (press Enter to skip): ")
+            # if vendor_id:
+            #     search_filters['VendorID'] = vendor_id  # Corrected column name
+            
+            price = input("Enter Price (press Enter to skip): ")
+            if price:
+                # Construct filter for price lower than entered
+                search_filters['book_price'] = price   # Corrected column name and added comparison operator
+                
+            
+            # Construct SQL query based on provided filters
+            sql_query = "SELECT * FROM Book JOIN Vendor ON Book.VendorID = Vendor.VendorID WHERE Vendor.VendorID = %s", (VendorID,)
+            conditions = []
+            for key, value in search_filters.items():
+                if key == 'book_price':
+                    conditions.append(f"{key} < {value}")
+                else:
+                    
+                    conditions.append(f"{key} = '{value}'")
+            
+            # Join conditions using 'OR' operator
+            sql_query += " OR ".join(conditions)
+            print(sql_query)
+            # Execute SQL query
+            cursor.execute(sql_query)
+            search_results = cursor.fetchall()
+
+            
+            # Display search results
+            if search_results:
+                print("Search Results:")
+                for book in search_results:
+                    print("Book ID:", book[0])
+                    print("Title:", book[1])
+                    print("Author:", book[2])
+                    print("Genre:", book[3])
+                    print("Series:", book[4])
+                    print("Publication:", book[5])
+                    print("Availability:", book[6])
+                   # print("Vendor ID:", book[7])
+                    print("Price:", book[7])
+                    print() 
+            else:
+                print("No books found matching the provided criteria.")
+            
+        elif choice == '3':
+            # Add a book
+            title = input("Enter Title: ")
+            author = input("Enter Author: ")
+            genre = input("Enter Genre: ")
+            series = input("Enter Series: ")
+            publication = input("Enter Publication: ")
+            stock = input("Enter Availability: ")
+            price = input("Enter Price: ")
+
+            cursor.execute("INSERT INTO Book (book_title, book_author, book_genre, book_series, book_publication, book_availability, VendorID, book_price) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                           (title, author, genre, series, publication, stock, vendor_id, price))
+            mydb.commit()
+
+            print("Book added successfully")
+        
+        elif choice == '4':
+            # Delete a book
+            book_id_to_delete = input("Enter the ID of the book you want to delete: ")
+            cursor.execute("DELETE FROM Book WHERE book_id = %s AND VendorID = %s", (book_id_to_delete, vendor_id))
+            mydb.commit()
+            print("Book deleted successfully.")
+            
+        elif choice == '5':
+            # Edit book stock
+            book_id_to_edit = input("Enter the ID of the book you want to edit: ")
+            new_stock = input("Enter the new stock availability for the book: ")
+            cursor.execute("UPDATE Book SET book_availability = %s WHERE book_id = %s AND VendorID = %s", (new_stock, book_id_to_edit, vendor_id))
+            mydb.commit()
+            print("Book stock updated successfully.")
+            
+        elif choice == '6':
+            # Show vendor's personal details
+            cursor.execute("SELECT * FROM Vendor WHERE vendor_id = %s", (vendor_id,))
+            vendor_info = cursor.fetchone()
+            if vendor_info:
+                print("Personal Information:")
+                print("Vendor ID:", vendor_info[0])
+                print("Vendor Name:", vendor_info[1])
+                print("Email:", vendor_info[2])
+                print("Age:", vendor_info[3])
+                print("Phone Number:", vendor_info[4])
+
+            else:
+                print("Vendor not found.")
+        
+        elif choice == '7':
+            print("Logging out...")
+            break
+        
+        else:
+            print("Invalid choice. Please enter a valid option.")
+    
+    login()
     
 def DeliveryAgentCommands():
     print("hello")
