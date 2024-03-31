@@ -1,5 +1,5 @@
 import mysql.connector
-# warehouse and vendor functionality is working but i have changed the vendor signup function a bit
+# admin's approval for (warehouse and vendor) functionality is working but i have changed the vendor signup function a bit 
 mydb = mysql.connector.connect(
         host="localhost",
         user="root",
