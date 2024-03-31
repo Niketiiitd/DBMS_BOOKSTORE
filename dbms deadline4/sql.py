@@ -10,6 +10,24 @@ mydb = mysql.connector.connect(
 
 cursor = mydb.cursor()
 
+
+def check_cart_availability(cursor, cart_items):
+    unavailable_books = []
+    for item in cart_items:
+        book_id = item[0]
+        quantity = item[2]
+
+        # Check if the requested quantity is available
+        cursor.execute("SELECT book_title, book_availability FROM Book WHERE book_id = %s", (book_id,))
+        book_info = cursor.fetchone()
+        
+        if book_info[1] < quantity:
+            unavailable_books.append((book_info[0], quantity, book_info[1]))
+
+    return unavailable_books
+
+
+
 def customer_signup():
     print("Customer Signup")
     name = input("Enter your name: ")
@@ -225,6 +243,7 @@ def login():
                 
                 if incorrect_attempts < 3:
                     print("Customer Login Successful!")
+                    cursor.execute("UPDATE Customer SET incorrect_attempts = 0 WHERE phone_number = %s", (cust_number,))
                     CustomerCommands(cust_number)
             else:
                 print("No such customer found!")
@@ -427,31 +446,36 @@ def CustomerCommands(customer_number):
             quantity = int(input("Enter the quantity: "))
 
             # Check if the book exists and is available
-            cursor.execute("SELECT * FROM Book WHERE book_id = %s AND book_availability > 0", (book_id,))
+            cursor.execute("SELECT * FROM Book WHERE book_id = %s", (book_id,))
             book = cursor.fetchone()
 
             if book:
                 # Check if the requested quantity is available
                 if book[6] >= quantity:
-                    # Insert the book into the cart
-                    if flag == 0:
-                        cursor.execute("INSERT INTO Cart (cart_id, customer_id, book_id, quantity) VALUES (%s, %s, %s, %s)",
-                                    (cart_id, cust_id, book_id, quantity))
+                    # Check if the book already exists in the cart
+                    cursor.execute("SELECT quantity FROM Cart WHERE customer_id = %s AND book_id = %s", (cust_id, book_id))
+                    existing_quantity = cursor.fetchone()
+
+                    if existing_quantity:
+                        # If the book already exists in the cart, update its quantity
+                        new_quantity = existing_quantity[0] + quantity
+                        cursor.execute("UPDATE Cart SET quantity = %s WHERE customer_id = %s AND book_id = %s",
+                                    (new_quantity, cust_id, book_id))
                     else:
-                        cursor.execute("INSERT INTO Cart (customer_id, book_id, quantity) VALUES (%s, %s, %s)",
-                                    (cust_id, book_id, quantity))
+                        # Otherwise, insert the book into the cart
+                        if flag == 0:
+                            cursor.execute("INSERT INTO Cart (cart_id, customer_id, book_id, quantity) VALUES (%s, %s, %s, %s)",
+                                            (cart_id, cust_id, book_id, quantity))
+                        else:
+                            cursor.execute("INSERT INTO Cart (customer_id, book_id, quantity) VALUES (%s, %s, %s)",
+                                            (cust_id, book_id, quantity))
 
                     mydb.commit()
                     print("Book added to cart successfully!")
-                    # Update the availability of the book in the Book table
-                    new_availability = book[6] - quantity
-                    cursor.execute("UPDATE Book SET book_availability = %s WHERE book_id = %s", (new_availability, book_id))
-                    mydb.commit()
-                    print(f"Quantity of book ID {book_id} decreased in the inventory.")
                 else:
                     print("Sorry, the requested quantity is not available.")
             else:
-                print("Book not found or not available.")
+                print("Book not found.")
 
         elif choice == 4:
             cursor.execute("SELECT * FROM customer_order WHERE customer_id = %s", (cust_id,))
@@ -575,92 +599,97 @@ def CustomerCommands(customer_number):
                 
         elif choice == 9:
             # Place order logic
-
-            # Check if the cart is empty
-            cursor.execute("SELECT * FROM Cart WHERE customer_id = %s", (cust_id,))
-            cart_items = cursor.fetchall()
-
-            if not cart_items:
-                print("Your cart is empty. Please add items to your cart before placing an order.")
+            unavailable_books = check_cart_availability(cursor, cart_items)
+            if unavailable_books:
+                print("The following books are not available in the selected quantity:")
+                for book in unavailable_books:
+                    print(f"Book: {book[0]}, Requested Quantity: {book[1]}, Available Quantity: {book[2]}")
+                print("Please update your cart accordingly.")
             else:
-                # Display cart items
-                # print("Your Cart:")
-                cursor.execute("SELECT c.book_id, b.book_price, c.quantity FROM Cart c JOIN Book b ON c.book_id = b.book_id WHERE c.customer_id = %s", (cust_id,))
+                cursor.execute("SELECT * FROM Cart WHERE customer_id = %s", (cust_id,))
                 cart_items = cursor.fetchall()
 
-                if cart_items:
-                    total_value = 0
-                
-                    for item in cart_items:
-                        book_id = item[0]
-                        price = item[1]
-                        quantity = item[2]
-                        total_item_value = price * quantity
-                        total_value += total_item_value
-                print("Total Cart Value:", total_value)
-             
-
-                # Ask for address and mode of payment
-            address_choice = input("Do you want to use your saved address? (yes/no): ").lower()
-            if address_choice == "yes":
-                # Retrieve and display saved address from Customer table
-                cursor.execute("SELECT Address_ID FROM Customer WHERE customer_id = %s", (cust_id,))
-                address_id = cursor.fetchone()[0]
-
-                cursor.execute("SELECT * FROM Address WHERE Address_ID = %s", (address_id,))
-                address_info = cursor.fetchone()
-
-                if address_info:
-                    print("Your Saved Address:")
-                    print("House Number:", address_info[1])
-                    print("Street Name:", address_info[2])
-                    print("City:", address_info[3])
-                    print("State:", address_info[4])
-                    print("Zip Code:", address_info[5])
+                if not cart_items:
+                    print("Your cart is empty. Please add items to your cart before placing an order.")
                 else:
-                    print("You haven't saved any address yet.")
-            elif address_choice == "no":
-                # Ask for new address
-                house_no = int(input("Enter your house number: "))
-                street_name = input("Enter your street name (press Enter to skip): ")
-                city = input("Enter your city: ")
-                state = input("Enter your state: ")
-                zip_code = int(input("Enter your zip code: "))
+                    # Display cart items
+                    # print("Your Cart:")
+                    cursor.execute("SELECT c.book_id, b.book_price, c.quantity FROM Cart c JOIN Book b ON c.book_id = b.book_id WHERE c.customer_id = %s", (cust_id,))
+                    cart_items = cursor.fetchall()
 
-                # Insert new address into the Address table
-                cursor.execute("INSERT INTO Address (House_NO, Street_Name, City, State, Zip) VALUES (%s, %s, %s, %s, %s)",
-                            (house_no, street_name, city, state, zip_code))
+                    if cart_items:
+                        total_value = 0
+                    
+                        for item in cart_items:
+                            book_id = item[0]
+                            price = item[1]
+                            quantity = item[2]
+                            total_item_value = price * quantity
+                            total_value += total_item_value
+                    print("Total Cart Value:", total_value)
+                    
+
+                    # Ask for address and mode of payment
+                address_choice = input("Do you want to use your saved address? (yes/no): ").lower()
+                if address_choice == "yes":
+                    # Retrieve and display saved address from Customer table
+                    cursor.execute("SELECT Address_ID FROM Customer WHERE customer_id = %s", (cust_id,))
+                    address_id = cursor.fetchone()[0]
+
+                    cursor.execute("SELECT * FROM Address WHERE Address_ID = %s", (address_id,))
+                    address_info = cursor.fetchone()
+
+                    if address_info:
+                        print("Your Saved Address:")
+                        print("House Number:", address_info[1])
+                        print("Street Name:", address_info[2])
+                        print("City:", address_info[3])
+                        print("State:", address_info[4])
+                        print("Zip Code:", address_info[5])
+                    else:
+                        print("You haven't saved any address yet.")
+                elif address_choice == "no":
+                    # Ask for new address
+                    house_no = int(input("Enter your house number: "))
+                    street_name = input("Enter your street name (press Enter to skip): ")
+                    city = input("Enter your city: ")
+                    state = input("Enter your state: ")
+                    zip_code = int(input("Enter your zip code: "))
+
+                    # Insert new address into the Address table
+                    cursor.execute("INSERT INTO Address (House_NO, Street_Name, City, State, Zip) VALUES (%s, %s, %s, %s, %s)",
+                                (house_no, street_name, city, state, zip_code))
+                    mydb.commit()
+
+                    # Retrieve the address_id of the newly inserted address
+                    address_id = cursor.lastrowid
+
+                else:
+                    print("Invalid choice. Please enter 'yes' or 'no'.")
+
+                # Ask for mode of payment
+                payment_mode = input("Enter mode of payment (e.g., Credit Card, PayPal, etc.): ")
+
+                # Insert order into customer_order table
+                cursor.execute("INSERT INTO customer_order (customer_id, total_price, address, payment_mode) VALUES (%s, %s, %s, %s)",
+                            (cust_id, total_value, address_id, payment_mode))
+                order_id = cursor.lastrowid
+
+                # Inserting the items from the cart into the OrderItem table
+                for item in cart_items:
+                    for item in cart_items:
+                        book_id = item[0]  # Index 0 corresponds to book_id
+                        price = item[1]    # Index 1 corresponds to book_price
+                        quantity = item[2] # Index 2 corresponds to quantity
+
+                    cursor.execute("INSERT INTO OrderItem (book_id, order_id, quantity) VALUES (%s, %s, %s)",
+                                (book_id, order_id, quantity))
+
+                # Clear the cart after placing the order
+                cursor.execute("DELETE FROM Cart WHERE customer_id = %s", (cust_id,))
                 mydb.commit()
 
-                # Retrieve the address_id of the newly inserted address
-                address_id = cursor.lastrowid
-
-            else:
-                print("Invalid choice. Please enter 'yes' or 'no'.")
-
-            # Ask for mode of payment
-            payment_mode = input("Enter mode of payment (e.g., Credit Card, PayPal, etc.): ")
-
-            # Insert order into customer_order table
-            cursor.execute("INSERT INTO customer_order (customer_id, total_price, address, payment_mode) VALUES (%s, %s, %s, %s)",
-                        (cust_id, total_value, address_id, payment_mode))
-            order_id = cursor.lastrowid
-
-            # Inserting the items from the cart into the OrderItem table
-            for item in cart_items:
-                for item in cart_items:
-                    book_id = item[0]  # Index 0 corresponds to book_id
-                    price = item[1]    # Index 1 corresponds to book_price
-                    quantity = item[2] # Index 2 corresponds to quantity
-
-                cursor.execute("INSERT INTO OrderItem (book_id, order_id, quantity) VALUES (%s, %s, %s)",
-                            (book_id, order_id, quantity))
-
-            # Clear the cart after placing the order
-            cursor.execute("DELETE FROM Cart WHERE customer_id = %s", (cust_id,))
-            mydb.commit()
-
-            print("Your order has been successfully placed. Thank you for shopping with us!")
+                print("Your order has been successfully placed. Thank you for shopping with us!")
 
         elif choice == 10:
             cursor.execute("DELETE FROM Cart WHERE customer_id = %s", (cust_id,))
