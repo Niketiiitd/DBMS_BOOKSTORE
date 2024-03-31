@@ -970,7 +970,7 @@ def DeliveryAgentCommands():
 
             elif choice == '4':
                 cursor.execute("SELECT * FROM Orders WHERE delivery_agent_id = %s AND delivery_status = 'In transit'", (agent_id,))
-                current_orders = cursor.fetchall()
+                current_orders = cursor.fetchone()
                 print("Order ID",current_orders[0])
                 print("Order Status",current_orders[1])
                 print("Order Date",current_orders[2])
@@ -978,7 +978,7 @@ def DeliveryAgentCommands():
 
             elif choice == '5':
                 cursor.execute("SELECT * FROM Orders WHERE delivery_agent_id = %s AND (delivery_status = 'Delivered' OR delivery_status = 'Cancelled')", (agent_id,))
-                past_orders= cursor.fetchall()
+                past_orders= cursor.fetchone()
                 print("Order ID", past_orders[0])
                 print("Order Status",past_orders[1])
                 print("Order Date",past_orders[2])
