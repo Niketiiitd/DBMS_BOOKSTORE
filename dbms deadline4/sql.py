@@ -1219,7 +1219,6 @@ def DeliveryAgentCommands():
                     print("Personal Information:")
                     print("Vendor ID:", agent_info[0])
                     print("Vendor Name:", agent_info[1])
-                    #print("Email:", vendor_info[2])
                     print("Availability:", agent_info[3])
                     print("Phone Number:", agent_info[4])
 
@@ -1235,10 +1234,8 @@ def DeliveryAgentCommands():
             elif choice == '3':
                 area_servicing = input("Enter the area you are servicing: ")
                 
-                # Add the area_servicing column to the DeliveryAgent table
                 cursor.execute("ALTER TABLE DeliveryAgent ADD IF NOT EXISTS area_servicing VARCHAR(255)")
                 
-                # Update the area_servicing value for the specific agent
                 cursor.execute("UPDATE DeliveryAgent SET area_servicing = %s WHERE agent_id = %s", (area_servicing, agent_id))
                 mydb.commit()
                 
