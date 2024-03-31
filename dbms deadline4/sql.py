@@ -250,18 +250,50 @@ def login():
 
         elif choice == 2:
             # Vendor login
-            vendor_email = input("Enter Vendor Email: ")
             vendor_phone_number = input("Enter Vendor Phone number: ")
+
+            if len(vendor_phone_number)!=10:
+                print("Incorrect length of phone number. Please enter a 10-digit phone number.")
+                continue
+
+                # Check if the account is banned
+            cursor.execute("SELECT vendor_banned FROM Vendor WHERE Phone_number = %s", (vendor_phone_number,))
+            vendor_banned_result = cursor.fetchone()
+            
+            if vendor_banned_result and vendor_banned_result[0]:  # If the account is banned
+                print("Your account has been suspended! Please contact admin to continue.")
+                continue  # Skip login attempt
+                
             vendor_pass = input("Enter Vendor Password: ")
+            # Counter for incorrect password attempts
+            vendor_incorrect_attempts = 0
             
             # Execute SQL query to check if vendor exists
-            cursor.execute("SELECT vendor_name FROM Vendor WHERE Email = %s AND Phone_number = %s", (vendor_email, vendor_phone_number))
-            result = cursor.fetchone()
+            cursor.execute("SELECT vendor_password, vendor_incorrect_attempts FROM Vendor WHERE Phone_number = %s", (vendor_phone_number,))
+            v_result = cursor.fetchone()
             
-            if result:
-                print("Vendor Login Successful!")
-                VendorCommands()
-                # Additional logic for vendor login can be added here
+            if v_result:
+                db_vendor_pass, db_vendor_attempts = v_result  # Fetch the password and incorrect attempts from the database
+                while vendor_pass != db_vendor_pass:
+                    vendor_incorrect_attempts += 1
+                    if vendor_incorrect_attempts >= 3:
+                        print("Too many incorrect attempts. Your account has been suspended! Please contact admin to continue.")
+                        # Logic to ban the account in the database
+                        cursor.execute("UPDATE Vendor SET vendor_banned = 1 WHERE Phone_number = %s", (vendor_phone_number,))
+                        # connection.commit()
+                        break
+                    print("Wrong Password! Please try again.")
+                    vendor_pass = input("Enter Vendor Password: ")
+                
+                # Update the incorrect attempts in the database
+                new_vendor_attempts = db_vendor_attempts + vendor_incorrect_attempts
+                cursor.execute("UPDATE Vendor SET vendor_incorrect_attempts = %s WHERE Phone_number = %s", (new_vendor_attempts, vendor_phone_number))
+                # connection.commit()
+                
+                if vendor_incorrect_attempts < 3:
+                    print("Vendor Login Successful!")
+                    cursor.execute("UPDATE Vendor SET vendor_incorrect_attempts = 0 WHERE Phone_number = %s", (vendor_phone_number,))
+                    VendorCommands(vendor_phone_number)
             else:
                 print("No such vendor found!")
         
