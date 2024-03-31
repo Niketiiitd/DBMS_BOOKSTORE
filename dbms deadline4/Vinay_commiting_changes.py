@@ -16,24 +16,6 @@ blocked_vendors =[]
 
 cursor = mydb.cursor()
 
-
-def check_cart_availability(cursor, cart_items):
-    unavailable_books = []
-    for item in cart_items:
-        book_id = item[0]
-        quantity = item[2]
-
-        # Check if the requested quantity is available
-        cursor.execute("SELECT book_title, book_availability FROM Book WHERE book_id = %s", (book_id,))
-        book_info = cursor.fetchone()
-        
-        if book_info[1] < quantity:
-            unavailable_books.append((book_info[0], quantity, book_info[1]))
-
-    return unavailable_books
-
-
-
 def customer_signup():
     print("Customer Signup")
     name = input("Enter your name: ")

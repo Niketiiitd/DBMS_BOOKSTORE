@@ -26,12 +26,12 @@ INSERT INTO Address (House_NO, Street_Name, City, State, Zip) VALUES
 
 
 -- Alter Vendor table to add new columns
-ALTER TABLE Vendor
-    ADD COLUMN vendor_password VARCHAR(255) NOT NULL,
-    ADD COLUMN vendor_banned BOOLEAN DEFAULT 0,
-    ADD COLUMN vendor_incorrect_attempts INT DEFAULT 0,
-    ADD CONSTRAINT chk_vendor_email CHECK (Email LIKE '%@%'),
-    ADD CONSTRAINT chk_password_length CHECK (LENGTH(vendor_password) >= 6);
+-- ALTER TABLE Vendor
+--     ADD COLUMN vendor_password VARCHAR(255) NOT NULL,
+--     ADD COLUMN vendor_banned BOOLEAN DEFAULT 0,
+--     ADD COLUMN vendor_incorrect_attempts INT DEFAULT 0,
+--     ADD CONSTRAINT chk_vendor_email CHECK (Email LIKE '%@%'),
+--     ADD CONSTRAINT chk_password_length CHECK (LENGTH(vendor_password) >= 6);
 
 -- Insert data into Vendor table
 INSERT INTO Vendor (vendor_name, Email, Age, Phone_number, vendor_password)

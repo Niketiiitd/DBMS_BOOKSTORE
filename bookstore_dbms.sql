@@ -200,40 +200,47 @@ CREATE TABLE IF NOT EXISTS StockQuantity (
 
 -- INSERT INTO customer_order (customer_id, total_price, address, payment_mode) VALUES (1, 100, '123 Main St', 'Credit Card');
 
+-- Trigger 1 
+CREATE TABLE IF NOT EXISTS LoginAttempts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    message VARCHAR(255) NOT NULL
+);
+
+
 DELIMITER //
-
--- Step 1: Create a stored procedure to generate the order summary and store it in a summary table
-CREATE PROCEDURE GenerateOrderSummaryAndStore(IN orderId INT)
-BEGIN
-    DECLARE total_items INT;
-    DECLARE total_price DECIMAL(10, 2);
-    
-    -- Calculate total items and total price for the order
-    SELECT SUM(oi.quantity) INTO total_items FROM OrderItem oi WHERE oi.order_id = orderId;
-    SELECT SUM(b.book_price * oi.quantity) INTO total_price
-    FROM OrderItem oi
-    JOIN Book b ON oi.book_id = b.book_id
-    WHERE oi.order_id = orderId;
-
-    -- Store order summary in summary table
-    INSERT INTO OrderSummary (order_id, total_items, total_price)
-    VALUES (orderId, total_items, total_price);
-    
-    -- Display order summary
-    SELECT CONCAT('Order Summary for Order ID: ', orderId) AS 'Summary';
-    SELECT CONCAT('Total Items: ', total_items) AS 'Total Items';
-    SELECT CONCAT('Total Price: $', total_price) AS 'Total Price';
-END //
-
-DELIMITER //;
-
-
--- Step 2: Create a trigger to execute the stored procedure after an order is placed
-CREATE TRIGGER AfterOrderPlaced
-AFTER INSERT ON customer_order
+CREATE TRIGGER block_customer_after_attempts
+AFTER UPDATE ON Customer
 FOR EACH ROW
 BEGIN
-    CALL GenerateOrderSummary(NEW.order_id);
+    IF NEW.incorrect_attempts >= 3 THEN
+        INSERT INTO LoginAttempts (customer_id) VALUES (NEW.customer_id);
+        UPDATE Customer
+        SET is_banned = 1
+        WHERE customer_id = NEW.customer_id;
+    END IF;
 END;
 //
 DELIMITER ;
+
+-- Trigger 2
+
+CREATE TABLE IF NOT EXISTS order_summary (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- Add other columns as needed
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
+);
+
+-- Create the trigger
+DELIMITER //
+CREATE TRIGGER create_order_summary_entry
+AFTER INSERT ON customer_order
+FOR EACH ROW
+BEGIN
+    INSERT INTO order_summary (customer_id) VALUES (NEW.customer_id);
+END;
+//
+DELIMITER ;
+
+

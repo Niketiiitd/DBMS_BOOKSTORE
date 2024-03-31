@@ -12,6 +12,14 @@ cursor = mydb.cursor()
 
 
 
+def display_message_from_trigger(cursor):
+    # Fetch the message from the LoginAttempts table
+    cursor.execute("SELECT message FROM LoginAttempts WHERE message IS NOT NULL")
+    result = cursor.fetchone()
+    if result:
+        print("Message from trigger:", result[0])
+    else:
+        print("No message from trigger.")
 
 
 def customer_signup():
@@ -178,6 +186,28 @@ def signup():
 
 def login():
     while True:
+        # trigger 2 message
+        # cursor.execute("SELECT * FROM order_summary")
+
+        # # Fetch all rows from the result set
+        # order_summary = cursor.fetchall()
+
+        # # Print the order_summary table
+        # for order in order_summary:
+        #     print(order)
+
+        # trigger 1 message
+        # print("Blocked user here ---->")
+        # cursor.execute("SELECT * FROM LoginAttempts")
+
+        # # Fetch all rows from the result set
+        # login_attempts = cursor.fetchall()
+
+        # # Print the login attempts entries
+        # for attempt in login_attempts:
+            
+        #     print(attempt)
+
         print("Enter as:")
         print("1.Customer")
         print("2.Vendor")
@@ -186,7 +216,6 @@ def login():
         print("5.Exit")
         print("Enter your Choice:", end=" ")
         choice = int(input())
-        
         if choice == 1:
             cust_number = input("Enter Customer Phone number: ")
 
@@ -203,38 +232,37 @@ def login():
                 continue  # Skip login attempt
                 
             cust_pass = input("Enter Customer Password: ")
-            # Counter for incorrect password attempts
-            incorrect_attempts = 0
             
-            # Execute SQL query to check if customer exists
+            # Execute SQL query to check if customer exists and get password and incorrect attempts
             cursor.execute("SELECT customer_password, incorrect_attempts FROM Customer WHERE phone_number = %s", (cust_number,))
             result = cursor.fetchone()
             
             if result:
                 db_cust_pass, db_incorrect_attempts = result  # Fetch the password and incorrect attempts from the database
+                incorrect_attempts = 0  # Reset incorrect attempts counter
+                
                 while cust_pass != db_cust_pass:
                     incorrect_attempts += 1
                     if incorrect_attempts >= 3:
                         print("Too many incorrect attempts. Your account has been suspended! Please contact admin to continue.")
-                        # Logic to ban the account in the database
-                        cursor.execute("UPDATE Customer SET is_banned = 1 WHERE phone_number = %s", (cust_number,))
-                        # connection.commit()
+                        cursor.execute("UPDATE Customer SET is_banned = 1, incorrect_attempts = 0 WHERE phone_number = %s", (cust_number,))
+                        mydb.commit()  # Commit the changes to the database
                         break
                     print("Wrong Password! Please try again.")
                     cust_pass = input("Enter Customer Password: ")
                 
-                # Update the incorrect attempts in the database
-                new_incorrect_attempts = db_incorrect_attempts + incorrect_attempts
-                cursor.execute("UPDATE Customer SET incorrect_attempts = %s WHERE phone_number = %s", (new_incorrect_attempts, cust_number))
-                # connection.commit()
+                if incorrect_attempts >= 3:
+                    cursor.execute("INSERT INTO LoginAttempts (message) VALUES (%s)", (cust_number,))
+                    mydb.commit()  # Commit the changes to the database
+                    continue  # Skip further processing
                 
-                if incorrect_attempts < 3:
+                
+                if cust_pass == db_cust_pass:
                     print("Customer Login Successful!")
                     cursor.execute("UPDATE Customer SET incorrect_attempts = 0 WHERE phone_number = %s", (cust_number,))
                     CustomerCommands(cust_number)
             else:
                 print("No such customer found!")
-
         elif choice == 2:
             # Vendor login
             vendor_phone_number = input("Enter Vendor Phone number: ")
@@ -323,6 +351,7 @@ def login():
         elif choice == 5:
             
             break
+    
     homepage()
     
 
@@ -814,7 +843,8 @@ def CustomerCommands(customer_number):
             break
             
         else:
-            print("Invalid choice. Please enter a valid option.")
+            # print("Invalid choice. Please enter a valid option.")
+            continue
     login()
     
 def VendorCommands(vendor_number):
