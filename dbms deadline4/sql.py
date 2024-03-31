@@ -85,6 +85,7 @@ def vendor_signup():
     print("Vendor Signup")
     name = input("Enter vendor name: ")
     email = input("Enter email: ")
+    vend_password = input("Enter your password")
     
     # Validate age input
     while True:
@@ -106,8 +107,8 @@ def vendor_signup():
             phone_number = input("Enter phone number: ")
     
     try:
-        cursor.execute("INSERT INTO Vendor (vendor_name, Email, Age, Phone_number) VALUES (%s, %s, %s, %s)",
-                       (name, email, age, phone_number))
+        cursor.execute("INSERT INTO Vendor (vendor_name, Email, Age, Phone_number, vendor_password) VALUES (%s, %s, %s, %s, %s)",
+                       (name, email, age, phone_number, vend_password))
         mydb.commit()
         print("Vendor signup successful!")
     except mysql.connector.Error as err:
