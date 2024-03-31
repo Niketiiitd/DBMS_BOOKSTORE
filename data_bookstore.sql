@@ -25,28 +25,37 @@ INSERT INTO Address (House_NO, Street_Name, City, State, Zip) VALUES
 
 
 
+-- Alter Vendor table to add new columns
+ALTER TABLE Vendor
+    ADD COLUMN vendor_password VARCHAR(255) NOT NULL,
+    ADD COLUMN vendor_banned BOOLEAN DEFAULT 0,
+    ADD COLUMN vendor_incorrect_attempts INT DEFAULT 0,
+    ADD CONSTRAINT chk_vendor_email CHECK (Email LIKE '%@%'),
+    ADD CONSTRAINT chk_password_length CHECK (LENGTH(vendor_password) >= 6);
 
-INSERT INTO Vendor (vendor_name, Email, Age, Phone_number) VALUES
-('Oliver', 'oliverrr@example.com', 35, 1234567896),
-('June', 'june@example.com', 40, 2345678901),
-('Agust', 'agust@example.com', 45, 3456789012),
-('Sophia', 'sophia@example.com', 50, 4567890123),
-('Ethan', 'ethan@example.com', 55, 5678901234),
-('Emma', 'emma@example.com', 60, 6789012345),
-('Mia', 'mia@example.com', 65, 7890123456),
-('James', 'james@example.com', 70, 8901234567),
-('Ava', 'ava@example.com', 75, 9012345678),
-('William', 'william@example.com', 80, 1234567890),
-('Olivia', 'olivia@example.com', 85, 2345678902),
-('Isaac', 'isaac@example.com', 90, 3456789013),
-('Charlotte', 'charlotte@example.com', 95, 4567890124),
-('Amelia', 'amelia@example.com', 100, 5678901235),
-('Michael', 'michael@example.com', 105, 6789012346),
-('Emma', 'emma2@example.com', 110, 7890123457),
-('Jacob', 'jacob@example.com', 115, 8901234568),
-('Abigail', 'abigail@example.com', 120, 9012345679),
-('Elijah', 'elijah@example.com', 125, 1234567895),
-('Sophia', 'sophia2@example.com', 130, 2345678908);
+-- Insert data into Vendor table
+INSERT INTO Vendor (vendor_name, Email, Age, Phone_number, vendor_password)
+VALUES
+('Oliver', 'oliverrr@example.com', 35, 1234567896, 'password1'),
+('June', 'june@example.com', 40, 2345678901, 'password2'),
+('Agust', 'agust@example.com', 45, 3456789012, 'password3'),
+('Sophia', 'sophia@example.com', 50, 4567890123, 'password4'),
+('Ethan', 'ethan@example.com', 55, 5678901234, 'password5'),
+('Emma', 'emma@example.com', 60, 6789012345, 'password6'),
+('Mia', 'mia@example.com', 65, 7890123456, 'password7'),
+('James', 'james@example.com', 70, 8901234567, 'password8'),
+('Ava', 'ava@example.com', 75, 9012345678, 'password9'),
+('William', 'william@example.com', 80, 1234567890, 'password10'),
+('Olivia', 'olivia@example.com', 85, 2345678902, 'password11'),
+('Isaac', 'isaac@example.com', 90, 3456789013, 'password12'),
+('Charlotte', 'charlotte@example.com', 95, 4567890124, 'password13'),
+('Amelia', 'amelia@example.com', 100, 5678901235, 'password14'),
+('Michael', 'michael@example.com', 105, 6789012346, 'password15'),
+('Emma', 'emma2@example.com', 110, 7890123457, 'password16'),
+('Jacob', 'jacob@example.com', 115, 8901234568, 'password17'),
+('Abigail', 'abigail@example.com', 120, 9012345679, 'password18'),
+('Elijah', 'elijah@example.com', 125, 1234567895, 'password19'),
+('Sophia', 'sophia2@example.com', 130, 2345678908, 'password20');
 
 
 -- delete from Vendor;
