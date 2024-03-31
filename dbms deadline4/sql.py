@@ -771,8 +771,8 @@ def VendorCommands():
             genre = input("Enter Genre: ")
             series = input("Enter Series: ")
             publication = input("Enter Publication: ")
-            stock = input("Enter Availability: ")
-            price = input("Enter Price: ")
+            stock = int(input("Enter Availability: "))
+            price = int(input("Enter Price: "))
 
             cursor.execute("INSERT INTO Book (book_title, book_author, book_genre, book_series, book_publication, book_availability, VendorID, book_price) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
                            (title, author, genre, series, publication, stock, vendor_id, price))
@@ -780,20 +780,32 @@ def VendorCommands():
 
             print("Book added successfully")
         
-        elif choice == '4':
+         elif choice == '4':
             # Delete a book
-            book_id_to_delete = input("Enter the ID of the book you want to delete: ")
-            cursor.execute("DELETE FROM Book WHERE book_id = %s AND VendorID = %s", (book_id_to_delete, vendor_id))
-            mydb.commit()
-            print("Book deleted successfully.")
+            book_id_to_delete = int(input("Enter the ID of the book you want to delete: "))
+            cursor.execute("SELECT * FROM Book WHERE book_id = %s AND VendorID = %s", (book_id_to_delete, vendor_id))
+            book = cursor.fetchone()
+            if book:
+                cursor.execute("DELETE FROM Book WHERE book_id = %s", (book_id_to_delete,))
+                mydb.commit()
+                print("Book deleted successfully.")
+            else:
+                print("Invalid Book ID or book belongs to another vendor.")
             
         elif choice == '5':
             # Edit book stock
-            book_id_to_edit = input("Enter the ID of the book you want to edit: ")
-            new_stock = input("Enter the new stock availability for the book: ")
-            cursor.execute("UPDATE Book SET book_availability = %s WHERE book_id = %s AND VendorID = %s", (new_stock, book_id_to_edit, vendor_id))
-            mydb.commit()
-            print("Book stock updated successfully.")
+            book_id_to_edit = int(input("Enter the ID of the book you want to edit: "))
+            new_stock = int(input("Enter the new stock for the book: "))
+            cursor.execute("SELECT * FROM Book WHERE book_id = %s AND VendorID = %s", (book_id_to_edit, vendor_id))
+            book = cursor.fetchone()
+            if book:
+                cursor.execute("UPDATE Book SET book_availability = %s WHERE book_id = %s", (new_stock, book_id_to_edit))
+                mydb.commit()
+                print("Book stock updated successfully.")
+            else:
+                print("Invalid Book ID or  book belongs to another vendor.")
+        
+       
             
         elif choice == '6':
             # Show vendor's personal details
