@@ -1,0 +1,36 @@
+.carousel-container {
+    overflow-x: auto;
+    white-space: nowrap;
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.carousel-inner {
+    display: inline-flex;
+    gap: 1rem;
+    padding-bottom: 1rem; /* To accommodate the scroll bar */
+}
+
+.carousel-items {
+    flex: 0 0 auto;
+    width: calc(33.333% - 1rem); /* Adjust as needed */
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+.carousel-control-prev {
+    left: 0;
+}
+
+.carousel-control-next {
+    right: 0;
+}

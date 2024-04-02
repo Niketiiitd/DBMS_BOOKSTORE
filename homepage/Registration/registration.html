@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid"> <!-- Wrap only the navbar in container-fluid -->
+          <!-- Brand -->
+          <a class="navbar-brand fs-1 me-4" href="#">BookStore</a> <!-- Very big BookStore -->
+          
+          <!-- Navbar links -->
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+          </div>
+        
+          
+        </div>
+      </nav>
+    <div class="container">
+        <h1 class="mt-5">Register</h1>
+        <p class="lead">Choose your role to get started:</p>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Register as Vendor</h5>
+                        <p class="card-text">Are you a business or individual interested in selling books on our platform? Register here to become a vendor.</p>
+                        <button class="btn btn-primary" onclick="redirectToVendorRegistration()">Vendor</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Register as Customer</h5>
+                        <p class="card-text">Sign up to browse, purchase books, and enjoy our subscription services. Register as a customer now.</p>
+                        <button class="btn btn-primary" onclick="redirectToCustomerRegistration()">Customer</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Register as Admin</h5>
+                        <p class="card-text">Register as an administrator to manage the bookstore.</p>
+                        <button class="btn btn-primary" onclick="redirectToAdminRegistration()">Admin</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="mt-3">Already have an account? <a href="#">Login</a></p>
+    </div>
+
+    <!-- Bootstrap JS and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
