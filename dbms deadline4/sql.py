@@ -323,7 +323,10 @@ def login():
             
             if result:
                 print("Delivery Agent Login Successful!")
-                DeliveryAgentCommands()
+                cursor.execute("select agent_id from DeliveryAgent where da_name = %s",(da_name))
+                result = cursor.fetchone()
+                print(result[0])
+                DeliveryAgentCommands(result[0])
                 # Additional logic for delivery agent login can be added here
             else:
                 print("No such delivery agent found!")
@@ -1191,16 +1194,10 @@ def VendorCommands(vendor_number):
     
     login()
  
-def DeliveryAgentCommands():
+def DeliveryAgentCommands(id):
     while True:
         try:
-            agent_id = int(input("Enter Delivery Agent ID: "))
-            cursor.execute("SELECT * FROM DeliveryAgent WHERE daID = %s", (agent_id,))
-            agent = cursor.fetchone()
-
-            if not agent:
-                print("Delivery agent not found.")
-                return
+            agent_id = id
             
             print("Delivery Agent Commands:")
             print("1. Personal Details")
@@ -1234,7 +1231,7 @@ def DeliveryAgentCommands():
             elif choice == '3':
                 area_servicing = input("Enter the area you are servicing: ")
                 
-                cursor.execute("ALTER TABLE DeliveryAgent ADD IF NOT EXISTS area_servicing VARCHAR(255)")
+                
                 
                 cursor.execute("UPDATE DeliveryAgent SET area_servicing = %s WHERE daID = %s", (area_servicing, agent_id))
                 mydb.commit()

@@ -65,8 +65,9 @@ CREATE TABLE IF NOT EXISTS DeliveryAgent (
     daID INT AUTO_INCREMENT PRIMARY KEY,
 	da_name VARCHAR(255) NOT NULL,
     da_password VARCHAR(50) NOT NULL,
-    availability VARCHAR(20) NOT NULL CHECK (availability IN ('Available', 'Unavailable')),
-    da_phone_no BIGINT UNIQUE NOT NULL
+    availability VARCHAR(20) NOT NULL,
+    da_phone_no BIGINT UNIQUE NOT NULL,
+    area_servicing VARCHAR(255) null
 );
 
 
