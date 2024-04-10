@@ -1,15 +1,14 @@
 import mysql.connector
 
 mydb = mysql.connector.connect(
-    host="Nikets-MacBook-Air.local",
+    host="localhost",
     user="root",
-    password="Niket@mac",
+    password="Kiopi@2004",
     database="bookshop", 
     auth_plugin='mysql_native_password'
 )
 
 cursor = mydb.cursor()
-
 
 
 def display_message_from_trigger(cursor):
@@ -323,10 +322,7 @@ def login():
             
             if result:
                 print("Delivery Agent Login Successful!")
-                cursor.execute("select agent_id from DeliveryAgent where da_name = %s",(da_name))
-                result = cursor.fetchone()
-                print(result[0])
-                DeliveryAgentCommands(result[0])
+                DeliveryAgentCommands()
                 # Additional logic for delivery agent login can be added here
             else:
                 print("No such delivery agent found!")
@@ -1194,10 +1190,16 @@ def VendorCommands(vendor_number):
     
     login()
  
-def DeliveryAgentCommands(id):
+def DeliveryAgentCommands():
     while True:
         try:
-            agent_id = id
+            agent_id = int(input("Enter Delivery Agent ID: "))
+            cursor.execute("SELECT * FROM DeliveryAgent WHERE daID = %s", (agent_id,))
+            agent = cursor.fetchone()
+
+            if not agent:
+                print("Delivery agent not found.")
+                return
             
             print("Delivery Agent Commands:")
             print("1. Personal Details")
@@ -1231,7 +1233,7 @@ def DeliveryAgentCommands(id):
             elif choice == '3':
                 area_servicing = input("Enter the area you are servicing: ")
                 
-                
+                cursor.execute("ALTER TABLE DeliveryAgent ADD IF NOT EXISTS area_servicing VARCHAR(255)")
                 
                 cursor.execute("UPDATE DeliveryAgent SET area_servicing = %s WHERE daID = %s", (area_servicing, agent_id))
                 mydb.commit()
@@ -1264,28 +1266,6 @@ def DeliveryAgentCommands(id):
         except Exception as e:
             print(f"An error occurred: {e}")
             break
-    
-def AdminCommands():
-    print("hello")
-
-# login()
-
-def homepage():
-    while True:
-        print("1.Signup")
-        print("2.Login")
-        print("3.Exit")
-        choice = int(input("Enter your choice: "))
-            
-        if choice == 1:
-            signup()
-        elif choice==2:
-            login()
-        elif choice==3:
-            break
-        else:
-            print("Invalid choice. Please enter a valid option.")
-homepage()   
 
 # def print_all_vendors():
 #     # Execute SQL query to fetch all vendors
@@ -1296,3 +1276,340 @@ homepage()
 #     for vendor in vendors:
 #         print(vendor)
 # print_all_vendors()
+
+# Function to process Warehouse
+def add_warehouse():
+    try:
+        owner_name = input("Enter owner's name: ")
+        street = input("Enter street address: ")
+        city_area = input("Enter city/area: ")
+        province_state = input("Enter province/state: ")
+        country = input("Enter country: ")
+        pincode = int(input("Enter pincode: "))
+
+        full_address = f"{owner_name}, {street}, {city_area}, {province_state}, {country}, {pincode}"
+
+        cursor.execute("INSERT INTO Warehouse (address, pincode) VALUES (%s, %s)", (full_address, pincode))
+        mydb.commit()
+        print("Warehouse added successfully.")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+def remove_warehouse_by_id(warehouse_id):
+    try:
+        cursor.execute("DELETE FROM Warehouse WHERE warehouseID = %s", (warehouse_id,))
+        mydb.commit()
+        print("Warehouse removed successfully.")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+def update_warehouse(warehouse_id):
+    try:
+        print("Select attribute to update:")
+        print("1. Address")
+        print("2. Pincode")
+        option = int(input("Enter the option: "))
+
+        if option == 1:
+            new_address = input("Enter new address: ")
+            cursor.execute("UPDATE Warehouse SET address = %s WHERE warehouseID = %s", (new_address, warehouse_id))
+        elif option == 2:
+            new_pincode = int(input("Enter new pincode: "))
+            # Fetch current address of the warehouse
+            cursor.execute("SELECT address FROM Warehouse WHERE warehouseID = %s", (warehouse_id,))
+            current_address = cursor.fetchone()[0]
+            # Replace the current pincode with the new pincode in the address
+            updated_address = current_address.replace(str(warehouse_id), str(new_pincode))
+            cursor.execute("UPDATE Warehouse SET pincode = %s, address = %s WHERE warehouseID = %s", (new_pincode, updated_address, warehouse_id))
+        else:
+            print("Invalid option.")
+            return
+
+        mydb.commit()
+        print("Warehouse updated successfully.")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+        
+        
+        
+def show_all_warehouses():
+    try:
+        cursor.execute("SELECT * FROM Warehouse")
+        warehouses = cursor.fetchall()
+        if warehouses:
+            print("All Warehouses:")
+            for warehouse in warehouses:
+                print("Warehouse ID:", warehouse[0])
+                print("Address:", warehouse[1])
+                print("Pincode:", warehouse[2])
+                print()  # Empty line for separation
+        else:
+            print("No warehouses found.")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+
+# Function to process Vendor
+# Function to display all pending vendor requests
+def display_pending_vendors():
+    try:
+        cursor.execute("SELECT VendorID, vendor_name, Email FROM PendingVendorRequests WHERE approved = False")
+        pending_vendors = cursor.fetchall()
+        if pending_vendors:
+            print("Pending Vendor Requests:")
+            for vendor in pending_vendors:
+                print(f"ID: {vendor[0]}, Name: {vendor[1]}, Email: {vendor[2]}")
+        else:
+            print("No pending vendor requests.")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+        
+
+# Function to approve a specific vendor request by ID
+def approve_vendor(vendor_id):
+    try:
+        cursor.execute("SELECT * FROM PendingVendorRequests WHERE VendorID = %s", (vendor_id,))
+        vendor_info = cursor.fetchone()
+        if vendor_info:
+            # Insert vendor info into the Vendor table
+            cursor.execute("INSERT INTO Vendor (vendor_name, Email, Age, Phone_number, vendor_password) VALUES (%s, %s, %s, %s, %s)",
+                           (vendor_info[1], vendor_info[2], vendor_info[3], vendor_info[4], vendor_info[5]))
+            mydb.commit()
+            print("Vendor approved and added to Vendor list.")
+            # Update message for approved vendor
+            cursor.execute("UPDATE PendingVendorRequests SET Message = 'Your request is approved and you are now a Vendor', approved = True WHERE VendorID = %s", (vendor_id,))
+            mydb.commit()
+
+            # Set up event to delete approved vendor from pending list after 2 minutes
+            cursor.execute("""CREATE EVENT IF NOT EXISTS DeleteApprovedVendorEvent
+                                ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 2 MINUTE
+                                DO
+                                    DELETE FROM PendingVendorRequests WHERE VendorID = %s""", (vendor_id,))
+            print("Event created to delete approved vendor from pending list after 2 minutes.")
+
+            # Fetch the last 3 entries from the Vendor table and print them
+            cursor.execute("SELECT * FROM Vendor ORDER BY VendorID DESC LIMIT 3")
+            vendor_list = cursor.fetchall()
+            print("Last 3 entries in the Vendor table:")
+            for vendor in vendor_list:
+                print(vendor)
+                
+        else:
+            print("Invalid vendor ID.")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+
+# Function to disapprove a specific vendor request by ID
+def disapprove_vendor(vendor_id):
+    try:
+        # Check if the vendor ID exists in the pending vendor requests table
+        cursor.execute("SELECT VendorID FROM PendingVendorRequests WHERE VendorID = %s", (vendor_id,))
+        result = cursor.fetchone()
+        if result:
+            # Vendor ID exists, proceed with updating the message
+            cursor.execute("UPDATE PendingVendorRequests SET Message = %s WHERE VendorID = %s", ("Your request has been disapproved by the vendor", vendor_id))
+            mydb.commit()
+            print("Vendor request disapproved. Message updated.")
+            # Create the trigger to set the deletion flag
+            cursor.execute("""CREATE TRIGGER IF NOT EXISTS DisapproveVendorTrigger
+                                AFTER UPDATE ON PendingVendorRequests
+                                FOR EACH ROW
+                                BEGIN
+                                    IF NEW.Message = 'Your Request has been disapproved by the vendor' THEN
+                                        UPDATE PendingVendorRequests SET DeletionFlag = 1 WHERE VendorID = NEW.VendorID;
+                                    END IF;
+                                END""")
+            # Create the event to delete records after 2 minutes
+            cursor.execute("""CREATE EVENT IF NOT EXISTS DeleteVendorDataEvent
+                                ON SCHEDULE EVERY 2 MINUTE
+                                DO
+                                    DELETE FROM PendingVendorRequests WHERE DeletionFlag = 1""")
+            
+            
+            
+            print("Events and triggers created successfully.")
+        else:
+            print("Vendor ID not found in the list of pending vendor requests.")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+
+
+
+
+def ban_vendor(vendor_id):
+    try:
+        cursor.execute("UPDATE Vendor SET vendor_banned = True WHERE VendorID = %s", (vendor_id,))
+        mydb.commit()
+        print("Vendor banned successfully.")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+
+def ban_customer(customer_id):
+    try:
+        cursor.execute("UPDATE Customer SET is_banned = True WHERE customer_id = %s", (customer_id,))
+        mydb.commit()
+        print("Customer banned successfully.")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+
+
+
+
+def Unban_vendor(vendor_id):
+    try:
+        cursor.execute("UPDATE Vendor SET vendor_banned = False WHERE VendorID = %s", (vendor_id,))
+        mydb.commit()
+        print("Vendor unbanned successfully.")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+    
+
+def Unban_customer(customer_id):
+    try:
+        cursor.execute("UPDATE Customer SET is_banned = False WHERE customer_id = %s", (customer_id,))
+        mydb.commit()
+        print("Customer unbanned successfully.")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+
+
+
+
+
+# Admin Commands
+def AdminCommands():
+    while True:  # Outer loop to ensure continuous operation until user exits
+        print("Admin Commands:")
+        print("1. Manage Pending Vendor requests.")
+        print("2. Warehouse Management.")
+        print("3. Ban a Vendor / Ban a Customer.")
+        print("4. UnBan a Customer/Vendor.")
+        option = int(input("Enter the Option:"))
+        
+        if option == 1:
+            while True:  # Inner loop for option 1
+                print("1. Show All Pending Vendor requests.")
+                print("2. Approve/Disapprove Vendor.")
+                sub_option = int(input("Enter the Option:"))
+                if sub_option == 1:
+                    display_pending_vendors()
+                elif sub_option == 2:
+                    print("1. Approve the Vendor.")
+                    print("2. Disapprove the Vendor.")
+                    sub_option2 = int(input("Enter the Option:"))
+                    if sub_option2 == 1:
+                        vendor_id = int(input("Enter the ID of the vendor you want to approve: "))
+                        approve_vendor(vendor_id)
+                    elif sub_option2 == 2:
+                        vendor_id = int(input("Enter the ID of the vendor you want to disapprove: "))
+                        disapprove_vendor(vendor_id)
+                    else:
+                        print("Please select a valid sub-option.")
+                else:
+                    print("Please select a valid option.")
+                if input("Do you want to continue with Vendor Management? (yes/no): ").lower() != 'yes':
+                    break
+
+        elif option == 2:
+            while True:  # Inner loop for option 2
+                print("1. Add Warehouse")
+                print("2. Remove Warehouse")
+                print("3. Update Warehouse")
+                print("4. Show All the Warehouses.")
+                sub_option = int(input("Enter the option:"))
+                if sub_option == 1:
+                    add_warehouse()
+                elif sub_option == 2:
+                    wid = int(input("Enter the warehouse id to remove:"))
+                    remove_warehouse_by_id(wid)
+                elif sub_option == 3:
+                    wid = int(input("Enter the warehouse id to update:"))
+                    update_warehouse(wid)
+                elif sub_option == 4:
+                    show_all_warehouses()
+                else:
+                    print("Please select a valid option.")
+                if input("Do you want to continue with Warehouse Management? (yes/no): ").lower() != 'yes':
+                    break
+
+        elif option == 3:
+            while True:  # Inner loop for option 3
+                print("1. Ban Vendor")
+                print("2. Ban Customer")
+                sub_option = int(input("Enter 1 to ban Vendor or 2 to ban Customer:"))
+                if sub_option == 1:
+                    vendor_id = int(input("Enter the ID of the vendor you want to ban: "))
+                    ban_vendor(vendor_id)
+                elif sub_option == 2:
+                    customer_id = int(input("Enter the ID of the customer you want to ban: "))
+                    ban_customer(customer_id)
+                else:
+                    print("Please select a valid option.")
+                if input("Do you want to continue with Ban Management? (yes/no): ").lower() != 'yes':
+                    break
+                
+        elif option == 4:
+            while True:  # Inner loop for option 4
+                print("1. Unban Vendor")
+                print("2. Unban Customer")
+                sub_option = int(input("Enter 1 to unban Vendor or 2 to unban Customer:"))
+                if sub_option == 1:
+                    vendor_id = int(input("Enter the ID of the vendor you want to unban: "))
+                    Unban_vendor(vendor_id)
+                elif sub_option == 2:
+                    customer_id = int(input("Enter the ID of the customer you want to unban: "))
+                    Unban_customer(customer_id)
+                else:
+                    print("Please select a valid option.")
+                if input("Do you want to continue with Unban Management? (yes/no): ").lower() != 'yes':
+                    break
+                    
+        else:
+            print("Invalid option.")
+            
+        if input("Do you want to continue? (yes/no): ").lower() == 'no':
+            break
+
+
+
+def homepage():
+    while True:
+        print("Welcome to the Home Page!")
+        print("1. Sign Up")
+        print("2. Log In")
+        print("3. Exit")
+        
+        choice = input("Please select an option: ")
+
+        if choice == "1":
+            # Call the sign_up function
+            signup()
+        elif choice == "2":
+            # Call the log_in function
+            login()
+        elif choice == "3":
+            print("Exiting...")
+            break
+        else:
+            print("Please select a valid option.")
+
+
+
+# Example usage
+homepage()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
