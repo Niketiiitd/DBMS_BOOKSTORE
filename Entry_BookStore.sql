@@ -23,6 +23,13 @@ INSERT INTO Address (House_NO, Street_Name, City, State, Zip) VALUES
 (4041, 'Grove Street', 'Detroit', 'Michigan', 48201),
 (4243, 'Spruce Court', 'Boston', 'Massachusetts', 02101);
 
+INSERT INTO PendingVendorRequests (vendor_name, Email, Age, Phone_number, vendor_password, Message)
+VALUES 
+    ('Vendor1', 'vendor1@example.com', 30, 9910912116, 'password1', 'Your Request is in queue to be approved by the vendor'),
+    ('Vendor2', 'vendor2@example.com', 35, 9871609793, 'password2', 'Your request is approved and you are now a Vendor'),
+    ('Vendor3', 'vendor3@example.com', 40, 8573054943, 'password3', 'Your Request has been disapproved by the vendor'),
+    ('Vendor4', 'vendor4@example.com', 45, 9936262396, 'password4', 'Your Request is in queue to be approved by the vendor'),
+    ('Vendor5', 'vendor5@example.com', 50, 8840516607, 'password5', 'Your Request is in queue to be approved by the vendor');
 
 
 -- Alter Vendor table to add new columns

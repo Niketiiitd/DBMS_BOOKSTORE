@@ -11,6 +11,18 @@ CREATE TABLE IF NOT EXISTS Address (
     Zip INT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS PendingVendorRequests (
+    VendorID INT AUTO_INCREMENT PRIMARY KEY,
+    vendor_name VARCHAR(255) NOT NULL,
+    Email VARCHAR(255) UNIQUE NOT NULL,
+    Age INT NOT NULL,
+    Phone_number BIGINT UNIQUE NOT NULL,
+    vendor_password VARCHAR(255) NOT NULL,
+    approved BOOLEAN DEFAULT 0,
+    DeletionFlag BOOLEAN DEFAULT 0,
+    Message VARCHAR(255) NOT NULL CHECK (Message IN ('Your Request is in queue to be approved by the vendor', 'Your request is approved and you are now a Vendor', 'Your Request has been disapproved by the vendor'))
+);
+
 -- Vendor table
 CREATE TABLE IF NOT EXISTS Vendor (
     VendorID INT AUTO_INCREMENT PRIMARY KEY,
@@ -65,9 +77,8 @@ CREATE TABLE IF NOT EXISTS DeliveryAgent (
     daID INT AUTO_INCREMENT PRIMARY KEY,
 	da_name VARCHAR(255) NOT NULL,
     da_password VARCHAR(50) NOT NULL,
-    availability VARCHAR(20) NOT NULL,
-    da_phone_no BIGINT UNIQUE NOT NULL,
-    area_servicing VARCHAR(255) null
+    availability VARCHAR(20) NOT NULL CHECK (availability IN ('Available', 'Unavailable','Busy')),
+    da_phone_no BIGINT UNIQUE NOT NULL
 );
 
 
@@ -243,5 +254,3 @@ BEGIN
 END;
 //
 DELIMITER ;
-
-
