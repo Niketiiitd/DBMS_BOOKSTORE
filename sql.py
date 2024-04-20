@@ -22,20 +22,20 @@ def change_customer_password(cust_number):
         print("Passwords do not match. Please try again.")
         return
     
-    # Begin transaction
+
     try:
         cursor.execute("START TRANSACTION")
         
-        # Update customer password
+
         cursor.execute("UPDATE Customer SET customer_password = %s WHERE phone_number = %s", (new_password, cust_number))
         
-        # Commit transaction
+      
         mydb.commit()
         
         print("Password changed successfully!")
     
     except Exception as e:
-        # Rollback transaction if any error occurs
+
         print("An error occurred:", str(e))
         print("Rolling back changes...")
         mydb.rollback()
@@ -44,7 +44,7 @@ def change_customer_password(cust_number):
 
 
 def display_message_from_trigger(cursor):
-    # Fetch the message from the LoginAttempts table
+
     cursor.execute("SELECT message FROM LoginAttempts WHERE message IS NOT NULL")
     result = cursor.fetchone()
     if result:
@@ -56,7 +56,7 @@ def customer_signup():
     print("Customer Signup")
     name = input("Enter your name: ")
 
-    # Validate house number input
+ 
     while True:
         try:
             house_no = int(input("Enter your house number: "))
@@ -69,7 +69,7 @@ def customer_signup():
     state = input("Enter your state: ")
     zip_code = input("Enter your ZIP code: ")
 
-    # Validate ZIP code input
+
     while True:
         try:
             zip_code = int(zip_code)
@@ -82,7 +82,7 @@ def customer_signup():
     email = input("Enter your email: ")
     password = input("Enter your password: ")
 
-    # Validate age input
+
     while True:
         try:
             age = int(input("Enter your age: "))
@@ -91,24 +91,22 @@ def customer_signup():
             print("Please enter a valid age (numeric value).")
 
     try:
-        # Begin transaction
+
         cursor.execute("START TRANSACTION")
 
-        # Insert address
+
         cursor.execute("INSERT INTO Address (House_NO, Street_Name, City, State, Zip) VALUES (%s, %s, %s, %s, %s)",
                        (house_no, street_name, city, state, zip_code))
         address_id = cursor.lastrowid
 
-        # Insert customer
+        
         cursor.execute("INSERT INTO Customer (customer_name, Address_ID, phone_number, email, customer_password, age) VALUES (%s, %s, %s, %s, %s, %s)",
                        (name, address_id, phone_number, email, password, age))
 
-        # Commit transaction
         mydb.commit()
         
         print("Customer signup successful!")
     except mysql.connector.Error as err:
-        # Rollback transaction if any error occurs
         print("Error:", err)
         print("Rolling back changes...")
         mydb.rollback()
@@ -119,7 +117,6 @@ def vendor_signup():
     email = input("Enter email: ")
     vend_password = input("Enter your password: ")
     
-    # Validate age input
     while True:
         try:
             age = int(input("Enter age: "))
@@ -129,7 +126,6 @@ def vendor_signup():
 
     phone_number = input("Enter phone number: ")
     
-    # Validate phone number input
     while True:
         try:
             phone_number = int(phone_number)
@@ -139,19 +135,15 @@ def vendor_signup():
             phone_number = input("Enter phone number: ")
     
     try:
-        # Begin transaction
         cursor.execute("START TRANSACTION")
         
-        # Insert vendor
         cursor.execute("INSERT INTO Vendor (vendor_name, Email, Age, Phone_number, vendor_password) VALUES (%s, %s, %s, %s, %s)",
                        (name, email, age, phone_number, vend_password))
         
-        # Commit transaction
         mydb.commit()
         
         print("Vendor signup successful!")
     except mysql.connector.Error as err:
-        # Rollback transaction if any error occurs
         print("Error:", err)
         print("Rolling back changes...")
         mydb.rollback()
@@ -161,10 +153,9 @@ def delivery_agent_signup():
     print("Delivery Agent Signup")
     name = input("Enter delivery agent name: ")
     password = input("Enter password: ")
-    availability = input("Enter availability (Available/Unavailable): ").capitalize()  # Capitalize input
+    availability = input("Enter availability (Available/Unavailable): ").capitalize()  
     phone_number = input("Enter phone number: ")
     
-    # Validate phone number input
     while True:
         try:
             phone_number = int(phone_number)
