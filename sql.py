@@ -940,8 +940,11 @@ def CustomerCommands(customer_number):
     
 def delete_book(vendor_id, book_id, quantity):
     try:
+        # Start a transaction
+        cursor.execute("START TRANSACTION")
+
         # Check if the book belongs to the vendor and has enough quantity to delete
-        cursor.execute("SELECT book_availability FROM Book WHERE book_id = %s AND VendorID = %s", (book_id, vendor_id))
+        cursor.execute("SELECT book_availability FROM Book WHERE book_id = %s AND VendorID = %s FOR UPDATE", (book_id, vendor_id))
         book = cursor.fetchone()
         if book:
             current_quantity = book[0]
@@ -949,15 +952,19 @@ def delete_book(vendor_id, book_id, quantity):
                 # Perform the deletion
                 new_quantity = current_quantity - quantity
                 cursor.execute("UPDATE Book SET book_availability = %s WHERE book_id = %s AND VendorID = %s", (new_quantity, book_id, vendor_id))
-                mydb.commit()
                 print(f"{quantity} books deleted successfully.")
             else:
                 print("Insufficient quantity to delete.")
         else:
             print("Invalid Book ID or book belongs to another vendor.")
+
+        # Commit the transaction
+        mydb.commit()
     except mysql.connector.Error as err:
+        # Rollback the transaction if an error occurs
+        mydb.rollback()
         print("Error:", err)
-        
+
         
 def VendorCommands(vendor_number):
     while True:
@@ -1220,6 +1227,7 @@ def DeliveryAgentCommands():
 # print_all_vendors()
 
 # Function to process Warehouse
+
 def add_warehouse():
     try:
         # Begin transaction
@@ -1247,14 +1255,24 @@ def add_warehouse():
 
 def remove_warehouse_by_id(warehouse_id):
     try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+        
         cursor.execute("DELETE FROM Warehouse WHERE warehouseID = %s", (warehouse_id,))
+        # Commit transaction
         mydb.commit()
         print("Warehouse removed successfully.")
     except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
         print("Error:", err)
+        print("Rolling back changes...")
+        mydb.rollback()
         
 def update_warehouse(warehouse_id):
     try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+        
         print("Select attribute to update:")
         print("1. Address")
         print("2. Pincode")
@@ -1275,17 +1293,24 @@ def update_warehouse(warehouse_id):
             print("Invalid option.")
             return
 
+        # Commit transaction
         mydb.commit()
         print("Warehouse updated successfully.")
     except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
         print("Error:", err)
-        
+        print("Rolling back changes...")
+        mydb.rollback()
         
         
 def show_all_warehouses():
     try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+        
         cursor.execute("SELECT * FROM Warehouse")
         warehouses = cursor.fetchall()
+        time.sleep(90)
         if warehouses:
             print("All Warehouses:")
             for warehouse in warehouses:
@@ -1295,13 +1320,25 @@ def show_all_warehouses():
                 print()  # Empty line for separation
         else:
             print("No warehouses found.")
+            
+        # Commit transaction
+        mydb.commit()
     except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
         print("Error:", err)
+        print("Rolling back changes...")
+        mydb.rollback()
 
-# Function to process Vendor
+
+
+
+
 # Function to display all pending vendor requests
 def display_pending_vendors():
     try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+        
         cursor.execute("SELECT VendorID, vendor_name, Email FROM PendingVendorRequests WHERE approved = False")
         pending_vendors = cursor.fetchall()
         if pending_vendors:
@@ -1310,24 +1347,31 @@ def display_pending_vendors():
                 print(f"ID: {vendor[0]}, Name: {vendor[1]}, Email: {vendor[2]}")
         else:
             print("No pending vendor requests.")
+            
+        # Commit transaction
+        mydb.commit()
     except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
         print("Error:", err)
+        print("Rolling back changes...")
+        mydb.rollback()
         
 
 # Function to approve a specific vendor request by ID
 def approve_vendor(vendor_id):
     try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+        
         cursor.execute("SELECT * FROM PendingVendorRequests WHERE VendorID = %s", (vendor_id,))
         vendor_info = cursor.fetchone()
         if vendor_info:
             # Insert vendor info into the Vendor table
             cursor.execute("INSERT INTO Vendor (vendor_name, Email, Age, Phone_number, vendor_password) VALUES (%s, %s, %s, %s, %s)",
                            (vendor_info[1], vendor_info[2], vendor_info[3], vendor_info[4], vendor_info[5]))
-            mydb.commit()
             print("Vendor approved and added to Vendor list.")
             # Update message for approved vendor
             cursor.execute("UPDATE PendingVendorRequests SET Message = 'Your request is approved and you are now a Vendor', approved = True WHERE VendorID = %s", (vendor_id,))
-            mydb.commit()
 
             # Set up event to delete approved vendor from pending list after 2 minutes
             cursor.execute("""CREATE EVENT IF NOT EXISTS DeleteApprovedVendorEvent
@@ -1345,83 +1389,106 @@ def approve_vendor(vendor_id):
                 
         else:
             print("Invalid vendor ID.")
+        
+        # Commit transaction
+        mydb.commit()
     except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
         print("Error:", err)
+        print("Rolling back changes...")
+        mydb.rollback()
 
 # Function to disapprove a specific vendor request by ID
 def disapprove_vendor(vendor_id):
     try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+        
         # Check if the vendor ID exists in the pending vendor requests table
         cursor.execute("SELECT VendorID FROM PendingVendorRequests WHERE VendorID = %s", (vendor_id,))
         result = cursor.fetchone()
         if result:
             # Vendor ID exists, proceed with updating the message
             cursor.execute("UPDATE PendingVendorRequests SET Message = %s WHERE VendorID = %s", ("Your request has been disapproved by the vendor", vendor_id))
-            mydb.commit()
             print("Vendor request disapproved. Message updated.")
-            # Create the trigger to set the deletion flag
-            cursor.execute("""CREATE TRIGGER IF NOT EXISTS DisapproveVendorTrigger
-                                AFTER UPDATE ON PendingVendorRequests
-                                FOR EACH ROW
-                                BEGIN
-                                    IF NEW.Message = 'Your Request has been disapproved by the vendor' THEN
-                                        UPDATE PendingVendorRequests SET DeletionFlag = 1 WHERE VendorID = NEW.VendorID;
-                                    END IF;
-                                END""")
-            # Create the event to delete records after 2 minutes
-            cursor.execute("""CREATE EVENT IF NOT EXISTS DeleteVendorDataEvent
-                                ON SCHEDULE EVERY 2 MINUTE
-                                DO
-                                    DELETE FROM PendingVendorRequests WHERE DeletionFlag = 1""")
-            
-            
-            
-            print("Events and triggers created successfully.")
         else:
             print("Vendor ID not found in the list of pending vendor requests.")
+        
+        # Commit transaction
+        mydb.commit()
     except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
         print("Error:", err)
+        print("Rolling back changes...")
+        mydb.rollback()
 
-
-
-
+# Function to ban a vendor by ID
 def ban_vendor(vendor_id):
     try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+        
         cursor.execute("UPDATE Vendor SET vendor_banned = True WHERE VendorID = %s", (vendor_id,))
-        mydb.commit()
         print("Vendor banned successfully.")
+        
+        # Commit transaction
+        mydb.commit()
     except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
         print("Error:", err)
+        print("Rolling back changes...")
+        mydb.rollback()
 
+# Function to ban a customer by ID
 def ban_customer(customer_id):
     try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+        
         cursor.execute("UPDATE Customer SET is_banned = True WHERE customer_id = %s", (customer_id,))
-        mydb.commit()
         print("Customer banned successfully.")
+        
+        # Commit transaction
+        mydb.commit()
     except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
         print("Error:", err)
+        print("Rolling back changes...")
+        mydb.rollback()
 
-
-
-
-def Unban_vendor(vendor_id):
+# Function to unban a vendor by ID
+def unban_vendor(vendor_id):
     try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+        
         cursor.execute("UPDATE Vendor SET vendor_banned = False WHERE VendorID = %s", (vendor_id,))
-        mydb.commit()
         print("Vendor unbanned successfully.")
-    except mysql.connector.Error as err:
-        print("Error:", err)
-    
-
-def Unban_customer(customer_id):
-    try:
-        cursor.execute("UPDATE Customer SET is_banned = False WHERE customer_id = %s", (customer_id,))
+        
+        # Commit transaction
         mydb.commit()
-        print("Customer unbanned successfully.")
     except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
         print("Error:", err)
+        print("Rolling back changes...")
+        mydb.rollback()
 
-
+# Function to unban a customer by ID
+def unban_customer(customer_id):
+    try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+        
+        cursor.execute("UPDATE Customer SET is_banned = False WHERE customer_id = %s", (customer_id,))
+        print("Customer unbanned successfully.")
+        
+        # Commit transaction
+        mydb.commit()
+    except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
+        print("Error:", err)
+        print("Rolling back changes...")
+        mydb.rollback()
 
 
 
@@ -1504,10 +1571,10 @@ def AdminCommands():
                 sub_option = int(input("Enter 1 to unban Vendor or 2 to unban Customer:"))
                 if sub_option == 1:
                     vendor_id = int(input("Enter the ID of the vendor you want to unban: "))
-                    Unban_vendor(vendor_id)
+                    unban_vendor(vendor_id)
                 elif sub_option == 2:
                     customer_id = int(input("Enter the ID of the customer you want to unban: "))
-                    Unban_customer(customer_id)
+                    unban_customer(customer_id)
                 else:
                     print("Please select a valid option.")
                 if input("Do you want to continue with Unban Management? (yes/no): ").lower() != 'yes':
@@ -1566,7 +1633,8 @@ def conflict1():
     mydb.close()
     
 
-conflict1()
+# conflict1()
+
 homepage()
 
 
