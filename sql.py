@@ -169,7 +169,7 @@ def delivery_agent_signup():
         # Begin transaction
         cursor.execute("START TRANSACTION")
         
-        # Insert delivery agent
+        
         cursor.execute("INSERT INTO DeliveryAgent (da_name, da_password, availability, da_phone_no) VALUES (%s, %s, %s, %s)",
                        (name, password, availability, phone_number))
         
@@ -188,7 +188,7 @@ def admin_signup():
     admin_id = input("Enter admin ID: ")
     password = input("Enter password: ")
     
-    # Validate admin ID input
+
     while True:
         try:
             admin_id = int(admin_id)
@@ -215,7 +215,7 @@ def admin_signup():
         print("Rolling back changes...")
         mydb.rollback()
 
-# Signup function
+
 def signup():
     while True:
         print("\nSignup as:")
@@ -280,35 +280,33 @@ def login():
             if len(cust_number) != 10:
                 print("Incorrect length of phone number. Please enter a 10-digit phone number.")
                 continue
-            
-            # Check if the account is banned
+
             cursor.execute("SELECT is_banned FROM Customer WHERE phone_number = %s", (cust_number,))
             is_banned_result = cursor.fetchone()
             
-            if is_banned_result and is_banned_result[0]:  # If the account is banned
+            if is_banned_result and is_banned_result[0]: 
                 print("Your account has been suspended! Please contact admin to continue.")
-                continue  # Skip login attempt
-                
+                continue  
             cust_pass = input("Enter Customer Password: ")
             flag_change_pass=0
             
             while True:
                 
                 
-                # Execute SQL query to check if customer exists and get password and incorrect attempts
+
                 cursor.execute("SELECT customer_password, incorrect_attempts FROM Customer WHERE phone_number = %s", (cust_number,))
                 result = cursor.fetchone()
                 
                 if result:
-                    db_cust_pass, db_incorrect_attempts = result  # Fetch the password and incorrect attempts from the database
-                    incorrect_attempts = 0  # Reset incorrect attempts counter
+                    db_cust_pass, db_incorrect_attempts = result  
+                    incorrect_attempts = 0 
                     
                     while cust_pass != db_cust_pass:
                         incorrect_attempts += 1
                         if incorrect_attempts >= 3:
                             print("Too many incorrect attempts. Your account has been suspended! Please contact admin to continue.")
                             cursor.execute("UPDATE Customer SET is_banned = 1, incorrect_attempts = 0 WHERE phone_number = %s", (cust_number,))
-                            mydb.commit()  # Commit the changes to the database
+                            mydb.commit() 
                             break
                         print("Wrong Password! Please try again.")
                         print("Change Password?")
@@ -322,8 +320,8 @@ def login():
                         break
                     if incorrect_attempts >= 3:
                         cursor.execute("INSERT INTO LoginAttempts (message) VALUES (%s)", (cust_number,))
-                        mydb.commit()  # Commit the changes to the database
-                        break  # Skip further processing
+                        mydb.commit() 
+                        break  
                     
                     if cust_pass == db_cust_pass:
                         print("Customer Login Successful!")
@@ -333,36 +331,36 @@ def login():
                 else:
                     print("No such customer found!")
         elif choice == 2:
-            # Vendor login
+           
             vendor_phone_number = input("Enter Vendor Phone number: ")
 
             if len(vendor_phone_number) != 10:
                 print("Incorrect length of phone number. Please enter a 10-digit phone number.")
                 continue
 
-            # Check if the account is banned
+     
             cursor.execute("SELECT vendor_banned FROM Vendor WHERE Phone_number = %s", (vendor_phone_number,))
             vendor_banned_result = cursor.fetchone()
 
-            if vendor_banned_result and vendor_banned_result[0]:  # If the account is banned
+            if vendor_banned_result and vendor_banned_result[0]: 
                 print("Your account has been suspended! Please contact admin to continue.")
-                continue  # Skip login attempt
+                continue  
 
             vendor_pass = input("Enter Vendor Password: ")
-            # Counter for incorrect password attempts
+            
             vendor_incorrect_attempts = 0
 
-            # Execute SQL query to check if vendor exists
+            
             cursor.execute("SELECT vendor_password, vendor_incorrect_attempts FROM Vendor WHERE Phone_number = %s", (vendor_phone_number,))
             v_result = cursor.fetchone()
 
             if v_result:
-                db_vendor_pass, db_vendor_attempts = v_result  # Fetch the password and incorrect attempts from the database
+                db_vendor_pass, db_vendor_attempts = v_result  
                 while vendor_pass != db_vendor_pass:
                     vendor_incorrect_attempts += 1
                     if vendor_incorrect_attempts >= 3:
                         print("Too many incorrect attempts. Your account has been suspended! Please contact admin to continue.")
-                        # Logic to ban the account in the database
+                       
                         cursor.execute("UPDATE Vendor SET vendor_banned = 1 WHERE Phone_number = %s", (vendor_phone_number,))
                         mydb.commit()
                         break
@@ -378,36 +376,36 @@ def login():
                 print("No such vendor found!")
 
         elif choice == 3:
-            # Delivery Agent login
+            
             da_name = input("Enter Delivery Agent Name: ")
             da_pass = input("Enter Delivery Agent Password: ")
             
-            # Execute SQL query to check if delivery agent exists
+            
             cursor.execute("SELECT da_name FROM DeliveryAgent WHERE da_name = %s AND da_password = %s", (da_name, da_pass))
             result = cursor.fetchone()
             
             if result:
                 print("Delivery Agent Login Successful!")
                 DeliveryAgentCommands()
-                # Additional logic for delivery agent login can be added here
+                
             else:
                 print("No such delivery agent found!")
         
         elif choice == 4:
-            # Admin login
+            
             admin_id = int(input("Enter Admin ID: "))
             admin_pass = input("Enter Admin Password: ")
             
-            # Execute SQL query to check if admin exists
+           
             cursor.execute("SELECT hashed_password FROM MAIN_ADMIN WHERE adminID = %s", (admin_id,))
             result = cursor.fetchone()
             
             if result:
-                db_admin_pass = result[0]  # Fetch the hashed password from the database
+                db_admin_pass = result[0]  
                 if db_admin_pass == admin_pass:
                     print("Admin Login Successful!")
                     AdminCommands()
-                    # Additional logic for admin login can be added here
+                    
                 else:
                     print("Wrong Password!")
             else:
@@ -440,15 +438,15 @@ def CustomerCommands(customer_number):
         print("12. Give book reviews")
         print("13. Logout")
         
-        # Prompt user for choice
+        
         choice = int(input("Enter your choice: "))
-        # delete_customer_carts(cursor, cust_id)
+     
         if choice == 1:
-            # Execute SQL query to fetch all books and their reviews
+           
             cursor.execute("SELECT b.*, r.rating, r.content FROM Book b LEFT JOIN ProductReview r ON b.book_id = r.book_id")
             books_with_reviews = cursor.fetchall()
             
-            # Display fetched books and their reviews
+           
             if books_with_reviews:
                 print("All Books:")
                 for book in books_with_reviews:
@@ -467,23 +465,23 @@ def CustomerCommands(customer_number):
             else:
                 print("No books found in the database.")
 
-        # Add logic for other choices as needed
+      
         elif choice == 2:
             # Search logic
             search_filters = {}
             
-            # Ask user for search filters
+          
             book_id = input("Enter Book ID (press Enter to skip): ")
             if book_id:
                 search_filters['book_id'] = book_id
             
             title = input("Enter Title (press Enter to skip): ")
             if title:
-                search_filters['book_title'] = title  # Corrected column name
+                search_filters['book_title'] = title  
                 
             author = input("Enter Author (press Enter to skip): ")
             if author:
-                search_filters['book_author'] = author  # Corrected column name
+                search_filters['book_author'] = author  
                 
             genre = input("Enter Genre (press Enter to skip): ")
             if genre:
@@ -503,15 +501,15 @@ def CustomerCommands(customer_number):
             
             vendor_id = input("Enter Vendor ID (press Enter to skip): ")
             if vendor_id:
-                search_filters['VendorID'] = vendor_id  # Corrected column name
+                search_filters['VendorID'] = vendor_id  
             
             price = input("Enter Price (press Enter to skip): ")
             if price:
-                # Construct filter for price lower than entered
-                search_filters['book_price'] = price   # Corrected column name and added comparison operator
+             
+                search_filters['book_price'] = price  
                 
             
-            # Construct SQL query based on provided filters
+          
             sql_query = "SELECT * FROM Book WHERE "
             conditions = []
             for key, value in search_filters.items():
@@ -521,15 +519,15 @@ def CustomerCommands(customer_number):
                     
                     conditions.append(f"{key} = '{value}'")
             
-            # Join conditions using 'OR' operator
+         
             sql_query += " OR ".join(conditions)
             print(sql_query)
-            # Execute SQL query
+            
             cursor.execute(sql_query)
             search_results = cursor.fetchall()
 
             
-            # Display search results
+          
             if search_results:
                 print("Search Results:")
                 for book in search_results:
@@ -546,9 +544,9 @@ def CustomerCommands(customer_number):
             else:
                 print("No books found matching the provided criteria.")
             
-            # Add logic for other choices as needed
+            
         elif choice == 3:
-            # Fetch cart_id for the corresponding customer
+           
             cursor.execute("SELECT cart_id FROM Cart WHERE customer_id = %s", (cust_id,))
             cart_info = cursor.fetchone()
             
@@ -558,28 +556,27 @@ def CustomerCommands(customer_number):
             else:
                 flag = 1
 
-            # Proceed with adding books to the cart
+   
             book_id = input("Enter the Book ID you want to add to your cart: ")
             quantity = int(input("Enter the quantity: "))
 
-            # Check if the book exists and is available
+           
             cursor.execute("SELECT * FROM Book WHERE book_id = %s", (book_id,))
             book = cursor.fetchone()
 
             if book:
-                # Check if the requested quantity is available
                 if book[6] >= quantity:
-                    # Check if the book already exists in the cart
+                    
                     cursor.execute("SELECT quantity FROM Cart WHERE customer_id = %s AND book_id = %s", (cust_id, book_id))
                     existing_quantity = cursor.fetchone()
 
                     if existing_quantity:
-                        # If the book already exists in the cart, update its quantity
+                       
                         new_quantity = existing_quantity[0] + quantity
                         cursor.execute("UPDATE Cart SET quantity = %s WHERE customer_id = %s AND book_id = %s",
                                     (new_quantity, cust_id, book_id))
                     else:
-                        # Otherwise, insert the book into the cart
+                       
                         if flag == 0:
                             cursor.execute("INSERT INTO Cart (cart_id, customer_id, book_id, quantity) VALUES (%s, %s, %s, %s)",
                                             (cart_id, cust_id, book_id, quantity))
@@ -608,7 +605,7 @@ def CustomerCommands(customer_number):
                     address_id = order[5]
                     payment_mode = order[6]
                     
-                    # Fetch address details from the Address table
+                    
                     cursor.execute("SELECT * FROM Address WHERE Address_ID = %s", (address_id,))
                     address_info = cursor.fetchone()
                     
@@ -637,7 +634,7 @@ def CustomerCommands(customer_number):
                 print("You haven't placed any orders yet.")
 
         elif choice == 5:
-            # Cart logic
+            
             cursor.execute("SELECT c.book_id, b.book_price, c.quantity FROM Cart c JOIN Book b ON c.book_id = b.book_id WHERE c.customer_id = %s", (cust_id,))
             cart_items = cursor.fetchall()
 
@@ -659,7 +656,7 @@ def CustomerCommands(customer_number):
                 print("Your cart is empty.")
 
         elif choice == 6:
-            # Personal details logic
+           
             cursor.execute("SELECT * FROM Customer WHERE phone_number = %s", (customer_number,))
             user_info = cursor.fetchone()
 
@@ -706,7 +703,7 @@ def CustomerCommands(customer_number):
                 mydb.rollback()
 
         elif choice == 8:
-            # DA Agent reviews logic
+            
             cursor.execute("SELECT * FROM DAgentReview WHERE customer_id = %s", (cust_id,))
             da_agent_reviews = cursor.fetchall()
 
@@ -729,7 +726,7 @@ def CustomerCommands(customer_number):
 
                 
         elif choice == 9:
-            # Place order logic
+            
             cursor.execute("SELECT * FROM Cart WHERE customer_id = %s", (cust_id,))
             cart_items = cursor.fetchall()
 
@@ -737,13 +734,13 @@ def CustomerCommands(customer_number):
                 print("Your cart is empty. Please add items to your cart before placing an order.")
                 continue
             else:
-                # Display cart items
+                
                 cursor.execute("SELECT c.book_id, b.book_price, c.quantity, b.book_availability FROM Cart c JOIN Book b ON c.book_id = b.book_id WHERE c.customer_id = %s", (cust_id,))
                 cart_items = cursor.fetchall()
 
                 if cart_items:
                     total_value = 0
-                    can_place_order = True  # Flag to check if the order can be placed
+                    can_place_order = True 
 
                     for item in cart_items:
                         book_id = item[0]
@@ -751,7 +748,7 @@ def CustomerCommands(customer_number):
                         quantity = item[2]
                         stock_quantity = item[3]
                         
-                        # Check if there is sufficient quantity in stock
+                        
                         if quantity > stock_quantity:
                             print(f"Sorry, the quantity of book with ID {book_id} is insufficient.")
                             can_place_order = False
@@ -766,10 +763,10 @@ def CustomerCommands(customer_number):
 
                     print("Total Cart Value:", total_value)
 
-                    # Ask for address and mode of payment
+                    
                     address_choice = input("Do you want to use your saved address? (yes/no): ").lower()
                     if address_choice == "yes":
-                        # Retrieve and display saved address from Customer table
+                       
                         cursor.execute("SELECT Address_ID FROM Customer WHERE customer_id = %s", (cust_id,))
                         address_id = cursor.fetchone()[0]
 
@@ -786,43 +783,43 @@ def CustomerCommands(customer_number):
                         else:
                             print("You haven't saved any address yet.")
                     elif address_choice == "no":
-                        # Ask for new address
+                        
                         house_no = int(input("Enter your house number: "))
                         street_name = input("Enter your street name (press Enter to skip): ")
                         city = input("Enter your city: ")
                         state = input("Enter your state: ")
                         zip_code = int(input("Enter your zip code: "))
 
-                        # Insert new address into the Address table
+                      
                         cursor.execute("INSERT INTO Address (House_NO, Street_Name, City, State, Zip) VALUES (%s, %s, %s, %s, %s)",
                                         (house_no, street_name, city, state, zip_code))
                         mydb.commit()
 
-                        # Retrieve the address_id of the newly inserted address
+                        
                         address_id = cursor.lastrowid
 
                     else:
                         print("Invalid choice. Please enter 'yes' or 'no'.")
 
-                    # Ask for mode of payment
+                    
                     payment_mode = input("Enter mode of payment (e.g., Credit Card, PayPal, etc.): ")
 
-                    # Insert order into customer_order table
+                   
                     cursor.execute("INSERT INTO customer_order (customer_id, total_price, address, payment_mode) VALUES (%s, %s, %s, %s)",
                                     (cust_id, total_value, address_id, payment_mode))
                     order_id = cursor.lastrowid
 
-                    # Deduct the quantity of books from stock
+                   
                     for item in cart_items:
-                        book_id = item[0]  # Index 0 corresponds to book_id
-                        quantity = item[2] # Index 2 corresponds to quantity
+                        book_id = item[0]  
+                        quantity = item[2] 
 
                         cursor.execute("UPDATE Book SET book_availability = book_availability - %s WHERE book_id = %s", (quantity, book_id))
 
-                    # Inserting the items from the cart into the OrderItem table
+                    
                     for item in cart_items:
-                        book_id = item[0]  # Index 0 corresponds to book_id
-                        quantity = item[2] # Index 2 corresponds to quantity
+                        book_id = item[0]  
+                        quantity = item[2]
 
                         cursor.execute("INSERT INTO OrderItem (book_id, order_id, quantity) VALUES (%s, %s, %s)",
                                         (book_id, order_id, quantity))
@@ -839,21 +836,33 @@ def CustomerCommands(customer_number):
                     #     print(summary)
 
         elif choice == 10:
-            # Delete the existing cart for the customer
-            cursor.execute("DELETE FROM Cart WHERE customer_id = %s", (cust_id,))
-            mydb.commit()
+            
+            try:
+                cursor.execute("START TRANSACTION;")
+                
+                # Delete the cart for the given customer_id
+                cursor.execute("DELETE FROM Cart WHERE customer_id = %s", (cust_id,))
+                
+               
+                mydb.commit()
 
-            # Create a new cart for the customer
-            cursor.execute("INSERT INTO Cart (customer_id) VALUES (%s)", (cust_id,))
-            mydb.commit()
+               
+                cursor.execute("INSERT INTO Cart (customer_id) VALUES (%s)", (cust_id,))
+                
+                
+                mydb.commit()
 
-            print("Your cart has been cleared and a new cart has been created.")
+                print("Your cart has been cleared and a new cart has been created.")
+
+            except mysql.connector.Error as e:
+                print("Error:", str(e))
+                mydb.rollback()  # Rollback the transaction in case of an error
 
         if choice == 11:
-            # Ask for book ID
+            
             book_id = int(input("Enter the Book ID: "))
             
-            # Fetch book details and description
+           
             cursor.execute("SELECT b.*, bd.book_description FROM Book b LEFT JOIN BookDescription bd ON b.book_id = bd.book_id WHERE b.book_id = %s", (book_id,))
             book_details = cursor.fetchone()
             
@@ -868,10 +877,10 @@ def CustomerCommands(customer_number):
                 print("Availability:", book_details[6])
                 print("Vendor ID:", book_details[7])
                 print("Price:", book_details[8])
-                print("Description:", book_details[9])  # Index 9 corresponds to book description
+                print("Description:", book_details[9])  
                 print()
                 
-                # Fetch and display reviews
+               
                 cursor.execute("SELECT rating, content FROM ProductReview WHERE book_id = %s", (book_id,))
                 reviews = cursor.fetchall()
                 
@@ -899,7 +908,7 @@ def CustomerCommands(customer_number):
                     print("Your Orders:")
                     for order in orders:
                         order_id = order[0]
-                        # Fetch books purchased in each order
+                        
                         cursor.execute("SELECT b.book_id, b.book_title FROM OrderItem oi JOIN Book b ON oi.book_id = b.book_id WHERE oi.order_id = %s", (order_id,))
                         books_in_order = cursor.fetchall()
                         
@@ -908,11 +917,11 @@ def CustomerCommands(customer_number):
                             print("Books Purchased:")
                             for book in books_in_order:
                                 print(f"Book ID: {book[0]}, Title: {book[1]}")
-                                # Prompt for review
+                               
                                 rating = int(input("Enter rating (0-5): "))
                                 content = input("Enter review content: ")
                                 
-                                # Insert review into ProductReview table
+                             
                                 cursor.execute("INSERT INTO ProductReview (book_id, customer_id, rating, content) VALUES (%s, %s, %s, %s)", (book[0], cust_id, rating, content))
                         
                 else:
@@ -929,12 +938,12 @@ def CustomerCommands(customer_number):
                 mydb.rollback()
 
         elif choice == 13:
-            # Logout logic
+           
             print("Signing out...")
             break
             
         else:
-            # print("Invalid choice. Please enter a valid option.")
+           
             continue
     login()
     
@@ -973,7 +982,7 @@ def delete_book(vendor_id, book_id, quantity):
 def VendorCommands(vendor_number):
     while True:
         cursor.execute("SELECT VendorID FROM Vendor WHERE phone_number = %s", (vendor_number,))
-        vendor_id = cursor.fetchone()[0]  # Assuming phone_number uniquely identifies a vendor
+        vendor_id = cursor.fetchone()[0]  
         
         print("1. View Vendor Books")
         print("2. Search")
@@ -1004,21 +1013,21 @@ def VendorCommands(vendor_number):
                 print("No books found in the database.")
         
         elif choice == '2':
-            # Search logic
+         
             search_filters = {}
             
-            # Ask user for search filters
+          
             book_id = input("Enter Book ID (press Enter to skip): ")
             if book_id:
                 search_filters['book_id'] = book_id
             
             title = input("Enter Title (press Enter to skip): ")
             if title:
-                search_filters['book_title'] = title  # Corrected column name
+                search_filters['book_title'] = title  
                 
             author = input("Enter Author (press Enter to skip): ")
             if author:
-                search_filters['book_author'] = author  # Corrected column name
+                search_filters['book_author'] = author 
                 
             genre = input("Enter Genre (press Enter to skip): ")
             if genre:
@@ -1042,11 +1051,11 @@ def VendorCommands(vendor_number):
             
             price = input("Enter Price (press Enter to skip): ")
             if price:
-                # Construct filter for price lower than entered
-                search_filters['book_price'] = price   # Corrected column name and added comparison operator
+                
+                search_filters['book_price'] = price   
                 
             
-            # Construct SQL query based on provided filters
+            
             sql_query = "SELECT * FROM Book JOIN Vendor ON Book.VendorID = Vendor.VendorID WHERE Vendor.VendorID = %s", (VendorID,)
             conditions = []
             for key, value in search_filters.items():
@@ -1056,15 +1065,15 @@ def VendorCommands(vendor_number):
                     
                     conditions.append(f"{key} = '{value}'")
             
-            # Join conditions using 'OR' operator
+           
             sql_query += " OR ".join(conditions)
             print(sql_query)
-            # Execute SQL query
+           
             cursor.execute(sql_query)
             search_results = cursor.fetchall()
 
             
-            # Display search results
+           
             if search_results:
                 print("Search Results:")
                 for book in search_results:
@@ -1082,7 +1091,7 @@ def VendorCommands(vendor_number):
                 print("No books found matching the provided criteria.")
             
         elif choice == '3':
-            # Add a book
+            
             title = input("Enter Title: ")
             author = input("Enter Author: ")
             genre = input("Enter Genre: ")
@@ -1103,7 +1112,7 @@ def VendorCommands(vendor_number):
             delete_book(vendor_id, book_id_to_delete, quantity_to_delete)
             
         elif choice == '5':
-            # Edit book stock
+           
             book_id_to_edit = int(input("Enter the ID of the book you want to edit: "))
             new_stock = int(input("Enter the new stock for the book: "))
             cursor.execute("SELECT * FROM Book WHERE book_id = %s AND VendorID = %s", (book_id_to_edit, vendor_id))
@@ -1118,7 +1127,7 @@ def VendorCommands(vendor_number):
        
             
         elif choice == '6':
-            # Show vendor's personal details
+           
             cursor.execute("SELECT * FROM Vendor WHERE vendor_id = %s", (vendor_id,))
             vendor_info = cursor.fetchone()
             if vendor_info:
@@ -1263,7 +1272,7 @@ def remove_warehouse_by_id(warehouse_id):
         cursor.execute("START TRANSACTION")
         
         cursor.execute("DELETE FROM Warehouse WHERE warehouseID = %s", (warehouse_id,))
-        # Commit transaction
+       
         mydb.commit()
         print("Warehouse removed successfully.")
     except mysql.connector.Error as err:
@@ -1361,7 +1370,7 @@ def display_pending_vendors():
         mydb.rollback()
         
 
-# Function to approve a specific vendor request by ID
+
 def approve_vendor(vendor_id):
     try:
         # Begin transaction
@@ -1370,21 +1379,21 @@ def approve_vendor(vendor_id):
         cursor.execute("SELECT * FROM PendingVendorRequests WHERE VendorID = %s", (vendor_id,))
         vendor_info = cursor.fetchone()
         if vendor_info:
-            # Insert vendor info into the Vendor table
+            
             cursor.execute("INSERT INTO Vendor (vendor_name, Email, Age, Phone_number, vendor_password) VALUES (%s, %s, %s, %s, %s)",
                            (vendor_info[1], vendor_info[2], vendor_info[3], vendor_info[4], vendor_info[5]))
             print("Vendor approved and added to Vendor list.")
-            # Update message for approved vendor
+            
             cursor.execute("UPDATE PendingVendorRequests SET Message = 'Your request is approved and you are now a Vendor', approved = True WHERE VendorID = %s", (vendor_id,))
 
-            # Set up event to delete approved vendor from pending list after 2 minutes
+           
             cursor.execute("""CREATE EVENT IF NOT EXISTS DeleteApprovedVendorEvent
                                 ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 2 MINUTE
                                 DO
                                     DELETE FROM PendingVendorRequests WHERE VendorID = %s""", (vendor_id,))
             print("Event created to delete approved vendor from pending list after 2 minutes.")
 
-            # Fetch the last 3 entries from the Vendor table and print them
+         
             cursor.execute("SELECT * FROM Vendor ORDER BY VendorID DESC LIMIT 3")
             vendor_list = cursor.fetchall()
             print("Last 3 entries in the Vendor table:")
@@ -1402,17 +1411,17 @@ def approve_vendor(vendor_id):
         print("Rolling back changes...")
         mydb.rollback()
 
-# Function to disapprove a specific vendor request by ID
+
 def disapprove_vendor(vendor_id):
     try:
         # Begin transaction
         cursor.execute("START TRANSACTION")
         
-        # Check if the vendor ID exists in the pending vendor requests table
+      
         cursor.execute("SELECT VendorID FROM PendingVendorRequests WHERE VendorID = %s", (vendor_id,))
         result = cursor.fetchone()
         if result:
-            # Vendor ID exists, proceed with updating the message
+
             cursor.execute("UPDATE PendingVendorRequests SET Message = %s WHERE VendorID = %s", ("Your request has been disapproved by the vendor", vendor_id))
             print("Vendor request disapproved. Message updated.")
         else:
@@ -1426,7 +1435,6 @@ def disapprove_vendor(vendor_id):
         print("Rolling back changes...")
         mydb.rollback()
 
-# Function to ban a vendor by ID
 def ban_vendor(vendor_id):
     try:
         # Begin transaction
@@ -1443,7 +1451,6 @@ def ban_vendor(vendor_id):
         print("Rolling back changes...")
         mydb.rollback()
 
-# Function to ban a customer by ID
 def ban_customer(customer_id):
     try:
         # Begin transaction
@@ -1460,7 +1467,6 @@ def ban_customer(customer_id):
         print("Rolling back changes...")
         mydb.rollback()
 
-# Function to unban a vendor by ID
 def unban_vendor(vendor_id):
     try:
         # Begin transaction
@@ -1477,7 +1483,6 @@ def unban_vendor(vendor_id):
         print("Rolling back changes...")
         mydb.rollback()
 
-# Function to unban a customer by ID
 def unban_customer(customer_id):
     try:
         # Begin transaction
@@ -1507,7 +1512,7 @@ def update_availability(agent_id, new_availability):
             (new_availability, agent_id,)
         )
         print(f"Setting availability to {new_availability} for agent {agent_id}")
-        # Simulating delay for concurrency effect
+       
         import time; time.sleep(1)
         mydb.commit()
         print(f"Availability updated to {new_availability} for agent {agent_id}")
@@ -1515,7 +1520,7 @@ def update_availability(agent_id, new_availability):
         print("Error:", str(e))
         mydb.rollback()
     finally:
-        # Release the lock after using shared resource
+       
         lock.release()
         # cursor.close()
 
@@ -1543,9 +1548,9 @@ def change_cust_password(cust_phone_number, new_password):
         lock.release()
         # cursor.close()
 
-# Admin Commands
+
 def AdminCommands():
-    while True:  # Outer loop to ensure continuous operation until user exits
+    while True: 
         print("Admin Commands:")
         print("1. Manage Pending Vendor requests.")
         print("2. Warehouse Management.")
@@ -1554,7 +1559,7 @@ def AdminCommands():
         option = int(input("Enter the Option:"))
         
         if option == 1:
-            while True:  # Inner loop for option 1
+            while True:  
                 print("1. Show All Pending Vendor requests.")
                 print("2. Approve/Disapprove Vendor.")
                 sub_option = int(input("Enter the Option:"))
@@ -1578,7 +1583,7 @@ def AdminCommands():
                     break
 
         elif option == 2:
-            while True:  # Inner loop for option 2
+            while True:  
                 print("1. Add Warehouse")
                 print("2. Remove Warehouse")
                 print("3. Update Warehouse")
@@ -1600,7 +1605,7 @@ def AdminCommands():
                     break
 
         elif option == 3:
-            while True:  # Inner loop for option 3
+            while True:  
                 print("1. Ban Vendor")
                 print("2. Ban Customer")
                 sub_option = int(input("Enter 1 to ban Vendor or 2 to ban Customer:"))
@@ -1616,7 +1621,7 @@ def AdminCommands():
                     break
                 
         elif option == 4:
-            while True:  # Inner loop for option 4
+            while True:  
                 print("1. Unban Vendor")
                 print("2. Unban Customer")
                 sub_option = int(input("Enter 1 to unban Vendor or 2 to unban Customer:"))
@@ -1689,7 +1694,7 @@ def conflict_3():
 def conflict_1():
     agent_id = 1  
 
- 
+    # Create two threads for concurrent setting availablity 
     thread1 = threading.Thread(target=update_availability, args=(agent_id, "Available"))
     thread2 = threading.Thread(target=update_availability, args=(agent_id, "Unavailable"))
 
@@ -1697,9 +1702,11 @@ def conflict_1():
     thread1.start()
     thread2.start()
 
-
+     # Wait for both threads to finish
     thread1.join()
     thread2.join()
+    
+    # Close the database connection
     cursor.close()
     mydb.close()
     
