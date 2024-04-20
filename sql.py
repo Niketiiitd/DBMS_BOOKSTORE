@@ -1,9 +1,9 @@
 import mysql.connector
 
 mydb = mysql.connector.connect(
-    host="localhost",
+    host="Nikets-MacBook-Air.local",
     user="root",
-    password="Kiopi@2004",
+    password="Niket@mac",
     database="bookshop", 
     auth_plugin='mysql_native_password'
 )
@@ -1592,7 +1592,8 @@ def homepage():
 
 
 
-# Example usage
+
+
 homepage()
 
 
