@@ -11,6 +11,38 @@ mydb = mysql.connector.connect(
 cursor = mydb.cursor()
 
 
+def change_customer_password(cust_number):
+    print("Enter OTP")
+    print("OTP Entered correctly.....")
+    print()
+    new_password = input("Enter new password: ")
+    confirm_password = input("Confirm new password: ")
+    
+    if new_password != confirm_password:
+        print("Passwords do not match. Please try again.")
+        return
+    
+    # Begin transaction
+    try:
+        cursor.execute("START TRANSACTION")
+        
+        # Update customer password
+        cursor.execute("UPDATE Customer SET customer_password = %s WHERE phone_number = %s", (new_password, cust_number))
+        
+        # Commit transaction
+        mydb.commit()
+        
+        print("Password changed successfully!")
+    
+    except Exception as e:
+        # Rollback transaction if any error occurs
+        print("An error occurred:", str(e))
+        print("Rolling back changes...")
+        mydb.rollback()
+    
+    
+
+
 def display_message_from_trigger(cursor):
     # Fetch the message from the LoginAttempts table
     cursor.execute("SELECT message FROM LoginAttempts WHERE message IS NOT NULL")
@@ -19,7 +51,6 @@ def display_message_from_trigger(cursor):
         print("Message from trigger:", result[0])
     else:
         print("No message from trigger.")
-
 
 def customer_signup():
     print("Customer Signup")
@@ -60,25 +91,33 @@ def customer_signup():
             print("Please enter a valid age (numeric value).")
 
     try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+
+        # Insert address
         cursor.execute("INSERT INTO Address (House_NO, Street_Name, City, State, Zip) VALUES (%s, %s, %s, %s, %s)",
                        (house_no, street_name, city, state, zip_code))
-        mydb.commit()
-
         address_id = cursor.lastrowid
 
+        # Insert customer
         cursor.execute("INSERT INTO Customer (customer_name, Address_ID, phone_number, email, customer_password, age) VALUES (%s, %s, %s, %s, %s, %s)",
                        (name, address_id, phone_number, email, password, age))
-        mydb.commit()
 
+        # Commit transaction
+        mydb.commit()
+        
         print("Customer signup successful!")
     except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
         print("Error:", err)
+        print("Rolling back changes...")
+        mydb.rollback()
 
 def vendor_signup():
     print("Vendor Signup")
     name = input("Enter vendor name: ")
     email = input("Enter email: ")
-    vend_password = input("Enter your password")
+    vend_password = input("Enter your password: ")
     
     # Validate age input
     while True:
@@ -100,12 +139,22 @@ def vendor_signup():
             phone_number = input("Enter phone number: ")
     
     try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+        
+        # Insert vendor
         cursor.execute("INSERT INTO Vendor (vendor_name, Email, Age, Phone_number, vendor_password) VALUES (%s, %s, %s, %s, %s)",
                        (name, email, age, phone_number, vend_password))
+        
+        # Commit transaction
         mydb.commit()
+        
         print("Vendor signup successful!")
     except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
         print("Error:", err)
+        print("Rolling back changes...")
+        mydb.rollback()
 
 
 def delivery_agent_signup():
@@ -125,13 +174,22 @@ def delivery_agent_signup():
             phone_number = input("Enter phone number: ")
     
     try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+        
+        # Insert delivery agent
         cursor.execute("INSERT INTO DeliveryAgent (da_name, da_password, availability, da_phone_no) VALUES (%s, %s, %s, %s)",
                        (name, password, availability, phone_number))
+        
+        # Commit transaction
         mydb.commit()
+        
         print("Delivery agent signup successful!")
     except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
         print("Error:", err)
-
+        print("Rolling back changes...")
+        mydb.rollback()
 
 def admin_signup():
     print("Admin Signup")
@@ -148,13 +206,22 @@ def admin_signup():
             admin_id = input("Enter admin ID: ")
     
     try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+        
+        # Insert admin
         cursor.execute("INSERT INTO MAIN_ADMIN (adminID, hashed_password) VALUES (%s, %s)",
                        (admin_id, password))
+        
+        # Commit transaction
         mydb.commit()
+        
         print("Admin signup successful!")
     except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
         print("Error:", err)
-
+        print("Rolling back changes...")
+        mydb.rollback()
 
 # Signup function
 def signup():
@@ -231,37 +298,48 @@ def login():
                 continue  # Skip login attempt
                 
             cust_pass = input("Enter Customer Password: ")
+            flag_change_pass=0
             
-            # Execute SQL query to check if customer exists and get password and incorrect attempts
-            cursor.execute("SELECT customer_password, incorrect_attempts FROM Customer WHERE phone_number = %s", (cust_number,))
-            result = cursor.fetchone()
-            
-            if result:
-                db_cust_pass, db_incorrect_attempts = result  # Fetch the password and incorrect attempts from the database
-                incorrect_attempts = 0  # Reset incorrect attempts counter
+            while True:
                 
-                while cust_pass != db_cust_pass:
-                    incorrect_attempts += 1
-                    if incorrect_attempts >= 3:
-                        print("Too many incorrect attempts. Your account has been suspended! Please contact admin to continue.")
-                        cursor.execute("UPDATE Customer SET is_banned = 1, incorrect_attempts = 0 WHERE phone_number = %s", (cust_number,))
-                        mydb.commit()  # Commit the changes to the database
+                
+                # Execute SQL query to check if customer exists and get password and incorrect attempts
+                cursor.execute("SELECT customer_password, incorrect_attempts FROM Customer WHERE phone_number = %s", (cust_number,))
+                result = cursor.fetchone()
+                
+                if result:
+                    db_cust_pass, db_incorrect_attempts = result  # Fetch the password and incorrect attempts from the database
+                    incorrect_attempts = 0  # Reset incorrect attempts counter
+                    
+                    while cust_pass != db_cust_pass:
+                        incorrect_attempts += 1
+                        if incorrect_attempts >= 3:
+                            print("Too many incorrect attempts. Your account has been suspended! Please contact admin to continue.")
+                            cursor.execute("UPDATE Customer SET is_banned = 1, incorrect_attempts = 0 WHERE phone_number = %s", (cust_number,))
+                            mydb.commit()  # Commit the changes to the database
+                            break
+                        print("Wrong Password! Please try again.")
+                        print("Change Password?")
+                        change_option = input("Enter Y to change password or any other key to proceed: ").upper()
+                        if change_option == "Y":
+                            change_customer_password(cust_number)
+                            flag_change_pass=1
+                            break
+                        cust_pass = input("Enter Customer Password: ")
+                    if flag_change_pass == 1:
                         break
-                    print("Wrong Password! Please try again.")
-                    cust_pass = input("Enter Customer Password: ")
-                
-                if incorrect_attempts >= 3:
-                    cursor.execute("INSERT INTO LoginAttempts (message) VALUES (%s)", (cust_number,))
-                    mydb.commit()  # Commit the changes to the database
-                    continue  # Skip further processing
-                
-                
-                if cust_pass == db_cust_pass:
-                    print("Customer Login Successful!")
-                    cursor.execute("UPDATE Customer SET incorrect_attempts = 0 WHERE phone_number = %s", (cust_number,))
-                    CustomerCommands(cust_number)
-            else:
-                print("No such customer found!")
+                    if incorrect_attempts >= 3:
+                        cursor.execute("INSERT INTO LoginAttempts (message) VALUES (%s)", (cust_number,))
+                        mydb.commit()  # Commit the changes to the database
+                        break  # Skip further processing
+                    
+                    if cust_pass == db_cust_pass:
+                        print("Customer Login Successful!")
+                        cursor.execute("UPDATE Customer SET incorrect_attempts = 0 WHERE phone_number = %s", (cust_number,))
+                        CustomerCommands(cust_number)
+                        break
+                else:
+                    print("No such customer found!")
         elif choice == 2:
             # Vendor login
             vendor_phone_number = input("Enter Vendor Phone number: ")
@@ -610,7 +688,10 @@ def CustomerCommands(customer_number):
             pass
         
         elif choice == 7:
-                # Book reviews logic
+            try:
+                # Begin transaction
+                cursor.execute("START TRANSACTION")
+                
                 # Execute SQL query to fetch book reviews given by the customer
                 cursor.execute("SELECT * FROM ProductReview WHERE customer_id = %s", (cust_id,))
                 reviews = cursor.fetchall()
@@ -625,6 +706,17 @@ def CustomerCommands(customer_number):
                         print()
                 else:
                     print("You haven't given any book reviews yet.")
+                
+                # Commit transaction
+                mydb.commit()
+                print("Transaction successful!")
+            
+            except mysql.connector.Error as err:
+                # Rollback transaction if any error occurs
+                print("Error:", err)
+                print("Rolling back changes...")
+                mydb.rollback()
+
         elif choice == 8:
             # DA Agent reviews logic
             cursor.execute("SELECT * FROM DAgentReview WHERE customer_id = %s", (cust_id,))
@@ -807,35 +899,47 @@ def CustomerCommands(customer_number):
                 print("Book not found.")
                 
         if choice == 12:
-            # Fetch orders placed by the customer
-            cursor.execute("SELECT order_id FROM customer_order WHERE customer_id = %s", (cust_id,))
-            orders = cursor.fetchall()
+            try:
+                # Begin transaction
+                cursor.execute("START TRANSACTION")
+                
+                # Fetch orders placed by the customer
+                cursor.execute("SELECT order_id FROM customer_order WHERE customer_id = %s", (cust_id,))
+                orders = cursor.fetchall()
 
-            if orders:
-                print("Your Orders:")
-                for order in orders:
-                    order_id = order[0]
-                    # Fetch books purchased in each order
-                    cursor.execute("SELECT b.book_id, b.book_title FROM OrderItem oi JOIN Book b ON oi.book_id = b.book_id WHERE oi.order_id = %s", (order_id,))
-                    books_in_order = cursor.fetchall()
-                    
-                    if books_in_order:
-                        print(f"Order ID: {order_id}")
-                        print("Books Purchased:")
-                        for book in books_in_order:
-                            print(f"Book ID: {book[0]}, Title: {book[1]}")
-                            # Prompt for review
-                            rating = int(input("Enter rating (0-5): "))
-                            content = input("Enter review content: ")
-                            
-                            # Insert review into ProductReview table
-                            cursor.execute("INSERT INTO ProductReview (book_id, customer_id, rating, content) VALUES (%s, %s, %s, %s)", (book[0], cust_id, rating, content))
-                            mydb.commit()
-                    else:
-                        print(f"No books found for Order ID: {order_id}")
-            else:
-                print("You haven't placed any orders yet.")
-        
+                if orders:
+                    print("Your Orders:")
+                    for order in orders:
+                        order_id = order[0]
+                        # Fetch books purchased in each order
+                        cursor.execute("SELECT b.book_id, b.book_title FROM OrderItem oi JOIN Book b ON oi.book_id = b.book_id WHERE oi.order_id = %s", (order_id,))
+                        books_in_order = cursor.fetchall()
+                        
+                        if books_in_order:
+                            print(f"Order ID: {order_id}")
+                            print("Books Purchased:")
+                            for book in books_in_order:
+                                print(f"Book ID: {book[0]}, Title: {book[1]}")
+                                # Prompt for review
+                                rating = int(input("Enter rating (0-5): "))
+                                content = input("Enter review content: ")
+                                
+                                # Insert review into ProductReview table
+                                cursor.execute("INSERT INTO ProductReview (book_id, customer_id, rating, content) VALUES (%s, %s, %s, %s)", (book[0], cust_id, rating, content))
+                        
+                else:
+                    print("You haven't placed any orders yet.")
+                
+                # Commit transaction
+                mydb.commit()
+                print("Transaction successful!")
+            
+            except mysql.connector.Error as err:
+                # Rollback transaction if any error occurs
+                print("Error:", err)
+                print("Rolling back changes...")
+                mydb.rollback()
+
         elif choice == 13:
             # Logout logic
             print("Signing out...")
@@ -1280,6 +1384,9 @@ def DeliveryAgentCommands():
 # Function to process Warehouse
 def add_warehouse():
     try:
+        # Begin transaction
+        cursor.execute("START TRANSACTION")
+
         owner_name = input("Enter owner's name: ")
         street = input("Enter street address: ")
         city_area = input("Enter city/area: ")
@@ -1290,10 +1397,16 @@ def add_warehouse():
         full_address = f"{owner_name}, {street}, {city_area}, {province_state}, {country}, {pincode}"
 
         cursor.execute("INSERT INTO Warehouse (address, pincode) VALUES (%s, %s)", (full_address, pincode))
+        
+        # Commit transaction
         mydb.commit()
         print("Warehouse added successfully.")
     except mysql.connector.Error as err:
+        # Rollback transaction if any error occurs
         print("Error:", err)
+        print("Rolling back changes...")
+        mydb.rollback()
+
 def remove_warehouse_by_id(warehouse_id):
     try:
         cursor.execute("DELETE FROM Warehouse WHERE warehouseID = %s", (warehouse_id,))
@@ -1301,6 +1414,7 @@ def remove_warehouse_by_id(warehouse_id):
         print("Warehouse removed successfully.")
     except mysql.connector.Error as err:
         print("Error:", err)
+        
 def update_warehouse(warehouse_id):
     try:
         print("Select attribute to update:")
