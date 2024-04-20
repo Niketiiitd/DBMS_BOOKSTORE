@@ -1,4 +1,5 @@
 import mysql.connector
+import threading
 
 mydb = mysql.connector.connect(
     host="Nikets-MacBook-Air.local",
@@ -335,26 +336,26 @@ def login():
             # Vendor login
             vendor_phone_number = input("Enter Vendor Phone number: ")
 
-            if len(vendor_phone_number)!=10:
+            if len(vendor_phone_number) != 10:
                 print("Incorrect length of phone number. Please enter a 10-digit phone number.")
                 continue
 
-                # Check if the account is banned
+            # Check if the account is banned
             cursor.execute("SELECT vendor_banned FROM Vendor WHERE Phone_number = %s", (vendor_phone_number,))
             vendor_banned_result = cursor.fetchone()
-            
+
             if vendor_banned_result and vendor_banned_result[0]:  # If the account is banned
                 print("Your account has been suspended! Please contact admin to continue.")
                 continue  # Skip login attempt
-                
+
             vendor_pass = input("Enter Vendor Password: ")
             # Counter for incorrect password attempts
             vendor_incorrect_attempts = 0
-            
+
             # Execute SQL query to check if vendor exists
             cursor.execute("SELECT vendor_password, vendor_incorrect_attempts FROM Vendor WHERE Phone_number = %s", (vendor_phone_number,))
             v_result = cursor.fetchone()
-            
+
             if v_result:
                 db_vendor_pass, db_vendor_attempts = v_result  # Fetch the password and incorrect attempts from the database
                 while vendor_pass != db_vendor_pass:
@@ -363,23 +364,19 @@ def login():
                         print("Too many incorrect attempts. Your account has been suspended! Please contact admin to continue.")
                         # Logic to ban the account in the database
                         cursor.execute("UPDATE Vendor SET vendor_banned = 1 WHERE Phone_number = %s", (vendor_phone_number,))
-                        # connection.commit()
+                        mydb.commit()
                         break
                     print("Wrong Password! Please try again.")
                     vendor_pass = input("Enter Vendor Password: ")
-                
-                # Update the incorrect attempts in the database
-                new_vendor_attempts = db_vendor_attempts + vendor_incorrect_attempts
-                cursor.execute("UPDATE Vendor SET vendor_incorrect_attempts = %s WHERE Phone_number = %s", (new_vendor_attempts, vendor_phone_number))
-                # connection.commit()
-                
+
                 if vendor_incorrect_attempts < 3:
                     print("Vendor Login Successful!")
                     cursor.execute("UPDATE Vendor SET vendor_incorrect_attempts = 0 WHERE Phone_number = %s", (vendor_phone_number,))
+                    mydb.commit()
                     VendorCommands(vendor_phone_number)
             else:
                 print("No such vendor found!")
-        
+
         elif choice == 3:
             # Delivery Agent login
             da_name = input("Enter Delivery Agent Name: ")
@@ -941,9 +938,30 @@ def CustomerCommands(customer_number):
             continue
     login()
     
+def delete_book(vendor_id, book_id, quantity):
+    try:
+        # Check if the book belongs to the vendor and has enough quantity to delete
+        cursor.execute("SELECT book_availability FROM Book WHERE book_id = %s AND VendorID = %s", (book_id, vendor_id))
+        book = cursor.fetchone()
+        if book:
+            current_quantity = book[0]
+            if current_quantity >= quantity:
+                # Perform the deletion
+                new_quantity = current_quantity - quantity
+                cursor.execute("UPDATE Book SET book_availability = %s WHERE book_id = %s AND VendorID = %s", (new_quantity, book_id, vendor_id))
+                mydb.commit()
+                print(f"{quantity} books deleted successfully.")
+            else:
+                print("Insufficient quantity to delete.")
+        else:
+            print("Invalid Book ID or book belongs to another vendor.")
+    except mysql.connector.Error as err:
+        print("Error:", err)
+        
+        
 def VendorCommands(vendor_number):
     while True:
-        cursor.execute("SELECT vendor_id FROM Vendor WHERE phone_number = %s", (vendor_number,))
+        cursor.execute("SELECT VendorID FROM Vendor WHERE phone_number = %s", (vendor_number,))
         vendor_id = cursor.fetchone()[0]  # Assuming phone_number uniquely identifies a vendor
         
         print("1. View Vendor Books")
@@ -1069,16 +1087,9 @@ def VendorCommands(vendor_number):
             print("Book added successfully")
         
         elif choice == '4':
-            # Delete a book
             book_id_to_delete = int(input("Enter the ID of the book you want to delete: "))
-            cursor.execute("SELECT * FROM Book WHERE book_id = %s AND VendorID = %s", (book_id_to_delete, vendor_id))
-            book = cursor.fetchone()
-            if book:
-                cursor.execute("DELETE FROM Book WHERE book_id = %s", (book_id_to_delete,))
-                mydb.commit()
-                print("Book deleted successfully.")
-            else:
-                print("Invalid Book ID or book belongs to another vendor.")
+            quantity_to_delete = int(input("Enter the quantity to delete: "))
+            delete_book(vendor_id, book_id_to_delete, quantity_to_delete)
             
         elif choice == '5':
             # Edit book stock
@@ -1118,172 +1129,8 @@ def VendorCommands(vendor_number):
             continue
     
     login()
-    
-def VendorCommands(vendor_number):
-    while True:
-        cursor.execute("SELECT VendorID FROM Vendor WHERE Phone_number = %s", (vendor_number,))
-        vendor_id = cursor.fetchone()[0]  # Assuming phone_number uniquely identifies a vendor
-        
-        print("1. View Vendor Books")
-        print("2. Search")
-        print("3. Add book")
-        print("4. Delete book")
-        print("5. Edit book stock")
-        print("6. Show your personal details")
-        print("7. Logout")
-        
-        choice = input("Enter your choice: ")
-        
-        if choice == '1':
-            cursor.execute("SELECT * FROM Book WHERE VendorID = %s", (vendor_id,))
-            books = cursor.fetchall()
-            if books:
-                print("All Books:")
-                for book in books:
-                    print("Book ID:", book[0])
-                    print("Title:", book[1])
-                    print("Author:", book[2])
-                    print("Genre:", book[3])
-                    print("Series:", book[4])
-                    print("Publication:", book[5])
-                    print("Availability:", book[6])
-                    print("Price:", book[7])
-                    print()
-            else:
-                print("No books found in the database.")
-        
-        elif choice == '2':
-            # Search logic
-            search_filters = {}
-            
-            # Ask user for search filters
-            book_id = input("Enter Book ID (press Enter to skip): ")
-            if book_id:
-                search_filters['book_id'] = book_id
-            
-            title = input("Enter Title (press Enter to skip): ")
-            if title:
-                search_filters['book_title'] = title
-                
-            author = input("Enter Author (press Enter to skip): ")
-            if author:
-                search_filters['book_author'] = author
-                
-            genre = input("Enter Genre (press Enter to skip): ")
-            if genre:
-                search_filters['book_genre'] = genre
-            
-            series = input("Enter Series (press Enter to skip): ")
-            if series:
-                search_filters['book_series'] = series
-            
-            publication = input("Enter Publication (press Enter to skip): ")
-            if publication:
-                search_filters['book_publication'] = publication
-            
-            availability = input("Enter Availability (press Enter to skip): ")
-            if availability:
-                search_filters['book_availability'] = availability
-            
-            price = input("Enter Price (press Enter to skip): ")
-            if price:
-                search_filters['book_price'] = price
-                
-            # Construct SQL query based on provided filters
-            sql_query = "SELECT * FROM Book WHERE VendorID = %s" % vendor_id
-            conditions = []
-            for key, value in search_filters.items():
-                conditions.append(f"{key} = '{value}'")
-            
-            # Join conditions using 'AND' operator
-            if conditions:
-                sql_query += " AND " + " AND ".join(conditions)
-            
-            # Execute SQL query
-            cursor.execute(sql_query)
-            search_results = cursor.fetchall()
-            
-            # Display search results
-            if search_results:
-                print("Search Results:")
-                for book in search_results:
-                    print("Book ID:", book[0])
-                    print("Title:", book[1])
-                    print("Author:", book[2])
-                    print("Genre:", book[3])
-                    print("Series:", book[4])
-                    print("Publication:", book[5])
-                    print("Availability:", book[6])
-                    print("Price:", book[7])
-                    print() 
-            else:
-                print("No books found matching the provided criteria.")
-            
-        elif choice == '3':
-            # Add a book
-            title = input("Enter Title: ")
-            author = input("Enter Author: ")
-            genre = input("Enter Genre: ")
-            series = input("Enter Series: ")
-            publication = input("Enter Publication: ")
-            stock = int(input("Enter Availability: "))
-            price = int(input("Enter Price: "))
+    1
 
-            cursor.execute("INSERT INTO Book (book_title, book_author, book_genre, book_series, book_publication, book_availability, VendorID, book_price) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-                           (title, author, genre, series, publication, stock, vendor_id, price))
-            mydb.commit()
-
-            print("Book added successfully")
-        
-        elif choice == '4':
-            # Delete a book
-            book_id_to_delete = int(input("Enter the ID of the book you want to delete: "))
-            cursor.execute("SELECT * FROM Book WHERE book_id = %s AND VendorID = %s", (book_id_to_delete, vendor_id))
-            book = cursor.fetchone()
-            if book:
-                cursor.execute("DELETE FROM Book WHERE book_id = %s", (book_id_to_delete,))
-                mydb.commit()
-                print("Book deleted successfully.")
-            else:
-                print("Invalid Book ID or book belongs to another vendor.")
-            
-        elif choice == '5':
-            # Edit book stock
-            book_id_to_edit = int(input("Enter the ID of the book you want to edit: "))
-            new_stock = int(input("Enter the new stock for the book: "))
-            cursor.execute("SELECT * FROM Book WHERE book_id = %s AND VendorID = %s", (book_id_to_edit, vendor_id))
-            book = cursor.fetchone()
-            if book:
-                cursor.execute("UPDATE Book SET book_availability = %s WHERE book_id = %s", (new_stock, book_id_to_edit))
-                mydb.commit()
-                print("Book stock updated successfully.")
-            else:
-                print("Invalid Book ID or  book belongs to another vendor.")
-        
-       
-            
-        elif choice == '6':
-            # Show vendor's personal details
-            cursor.execute("SELECT * FROM Vendor WHERE vendorID = %s", (vendor_id,))
-            vendor_info = cursor.fetchone()
-            if vendor_info:
-                print("Personal Information:")
-                print("Vendor ID:", vendor_info[0])
-                print("Vendor Name:", vendor_info[1])
-                print("Email:", vendor_info[2])
-                print("Age:", vendor_info[3])
-                print("Phone Number:", vendor_info[4])
-
-            else:
-                print("Vendor not found.")
-        elif choice == '7':
-            print("Logging out...")
-            break
-        
-        else:
-            print("Invalid choice. Please enter a valid option.")
-    
-    login()
  
 def DeliveryAgentCommands():
     while True:
@@ -1696,9 +1543,30 @@ def homepage():
             print("Please select a valid option.")
 
 
+def conflict1():
+    
+    vendor_id = 1  # Replace 1 with the actual vendor ID
+    book_id = 1    # Replace 1 with the actual book ID
+    quantity = 10  # Specify the quantity to delete
 
+    # Create two threads for concurrent deletion
+    thread1 = threading.Thread(target=delete_book, args=(vendor_id, book_id, quantity))
+    thread2 = threading.Thread(target=delete_book, args=(vendor_id, book_id, quantity))
 
+    # Start both threads
+    thread1.start()
+    thread2.start()
 
+    # Wait for both threads to finish
+    thread1.join()
+    thread2.join()
+
+    # Close the database connection
+    cursor.close()
+    mydb.close()
+    
+
+conflict1()
 homepage()
 
 
