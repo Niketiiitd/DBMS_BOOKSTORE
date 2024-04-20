@@ -940,6 +940,7 @@ def CustomerCommands(customer_number):
     
 def delete_book(vendor_id, book_id, quantity):
     try:
+        lock.acquire()
         # Start a transaction
         cursor.execute("START TRANSACTION")
 
@@ -964,6 +965,9 @@ def delete_book(vendor_id, book_id, quantity):
         # Rollback the transaction if an error occurs
         mydb.rollback()
         print("Error:", err)
+    finally:
+        # Release the lock
+        lock.release()
 
         
 def VendorCommands(vendor_number):
@@ -1491,6 +1495,53 @@ def unban_customer(customer_id):
         mydb.rollback()
 
 
+def update_availability(agent_id, new_availability):
+    # cursor = mydb.cursor()
+    try:
+        # Acquire lock before accessing shared resource
+        lock.acquire()
+        
+        cursor.execute("START TRANSACTION;")
+        cursor.execute(
+            "UPDATE DeliveryAgent SET availability = %s WHERE daID = %s",
+            (new_availability, agent_id,)
+        )
+        print(f"Setting availability to {new_availability} for agent {agent_id}")
+        # Simulating delay for concurrency effect
+        import time; time.sleep(1)
+        mydb.commit()
+        print(f"Availability updated to {new_availability} for agent {agent_id}")
+    except mysql.connector.Error as e:
+        print("Error:", str(e))
+        mydb.rollback()
+    finally:
+        # Release the lock after using shared resource
+        lock.release()
+        # cursor.close()
+
+def change_cust_password(cust_phone_number, new_password):
+    
+    try:
+        # Acquire lock before accessing shared resource
+        lock.acquire()
+        
+        cursor.execute("START TRANSACTION;")
+        print(f"Attempting to update password for customer with phone number: {cust_phone_number}")
+        cursor.execute(
+            "UPDATE Customer SET customer_password = %s WHERE phone_number = %s",
+            (new_password, cust_phone_number,)
+        )
+        
+        import time; time.sleep(2)
+        mydb.commit()
+        print(f"Password for customer {cust_phone_number} updated to {new_password}")
+    except mysql.connector.Error as e:
+        print("Error:", str(e))
+        mydb.rollback()
+    finally:
+        # Release the lock after using shared resource
+        lock.release()
+        # cursor.close()
 
 # Admin Commands
 def AdminCommands():
@@ -1610,7 +1661,7 @@ def homepage():
             print("Please select a valid option.")
 
 
-def conflict1():
+def conflict_3():
     
     vendor_id = 1  # Replace 1 with the actual vendor ID
     book_id = 1    # Replace 1 with the actual book ID
@@ -1633,8 +1684,50 @@ def conflict1():
     mydb.close()
     
 
-# conflict1()
 
+
+def conflict_1():
+    agent_id = 1  
+
+ 
+    thread1 = threading.Thread(target=update_availability, args=(agent_id, "Available"))
+    thread2 = threading.Thread(target=update_availability, args=(agent_id, "Unavailable"))
+
+
+    thread1.start()
+    thread2.start()
+
+
+    thread1.join()
+    thread2.join()
+    cursor.close()
+    mydb.close()
+    
+
+
+def conflict_2():
+    cust_phone_number = '8619631019' 
+
+    thread1 = threading.Thread(target=change_cust_password, args=(cust_phone_number, "Password123"))
+    thread2 = threading.Thread(target=change_cust_password, args=(cust_phone_number, "Secure456"))
+
+    thread1.start()
+    thread2.start()
+
+    thread1.join()
+    thread2.join()
+    cursor.close()
+    mydb.close()
+    
+
+
+lock = threading.Lock()
+
+# conflict_1()
+
+# conflict_2()
+
+# conflict_3()
 homepage()
 
 
