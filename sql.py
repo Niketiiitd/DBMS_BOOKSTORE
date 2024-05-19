@@ -2,9 +2,9 @@ import mysql.connector
 import threading
 
 mydb = mysql.connector.connect(
-    host="Nikets-MacBook-Air.local",
+    host="************",
     user="root",
-    password="Niket@mac",
+    password="************",
     database="bookshop", 
     auth_plugin='mysql_native_password'
 )
@@ -1464,7 +1464,7 @@ def ban_customer(customer_id):
     except mysql.connector.Error as err:
         # Rollback transaction if any error occurs
         print("Error:", err)
-        print("Rolling back changes...")
+        print("Rolling back changes...") 
         mydb.rollback()
 
 def unban_vendor(vendor_id):
@@ -1671,7 +1671,6 @@ def conflict_3():
     vendor_id = 1  # Replace 1 with the actual vendor ID
     book_id = 1    # Replace 1 with the actual book ID
     quantity = 10  # Specify the quantity to delete
-
     # Create two threads for concurrent deletion
     thread1 = threading.Thread(target=delete_book, args=(vendor_id, book_id, quantity))
     thread2 = threading.Thread(target=delete_book, args=(vendor_id, book_id, quantity))
@@ -1687,8 +1686,6 @@ def conflict_3():
     # Close the database connection
     cursor.close()
     mydb.close()
-    
-
 
 
 def conflict_1():
@@ -1697,8 +1694,8 @@ def conflict_1():
     # Create two threads for concurrent setting availablity 
     thread1 = threading.Thread(target=update_availability, args=(agent_id, "Available"))
     thread2 = threading.Thread(target=update_availability, args=(agent_id, "Unavailable"))
-
-
+    
+    
     thread1.start()
     thread2.start()
 
@@ -1735,11 +1732,66 @@ lock = threading.Lock()
 # conflict_2()
 
 # conflict_3()
-homepage()
+# homepage()
 
 
+def vendor_signup4(cursor, mydb):
+    print("Vendor Signup")
+    name = input("Enter vendor name: ")
+    email = input("Enter email: ")
+    vend_password = input("Enter your password: ")
+    
+    while True:
+        try:
+            age = int(input("Enter age: "))
+            break
+        except ValueError:
+            print("Please enter a valid age (numeric value).")
 
+    phone_number = input("Enter phone number: ")
+    
+    while True:
+        try:
+            phone_number = int(phone_number)
+            break
+        except ValueError:
+            print("Please enter a valid phone number (numeric value).")
+            phone_number = input("Enter phone number: ")
+    
+    try:
+        # Start first transaction
+        cursor.execute("START TRANSACTION")
+        
+        cursor.execute("INSERT INTO Vendor (vendor_name, Email, Age, Phone_number, vendor_password) VALUES (%s, %s, %s, %s, %s)",
+                       (name, email, age, phone_number, vend_password))
+        
+        mydb.commit()
+        
+        
+        print("First Vendor signup successful!")
+        mydb.rollback()
+    except mysql.connector.Error as err:
+        print("Error:", err)
+        print("Rolling back first transaction...")
+        mydb.rollback()
 
+    try:
+        # Start second transaction
+        cursor.execute("START TRANSACTION")
+        
+        # Perform some other operation (for demonstration purposes, you can just print something)
+        print("Second transaction started.")
+        cursor.execute("INSERT INTO Vendor (vendor_name, Email, Age, Phone_number, vendor_password) VALUES (%s, %s, %s, %s, %s)",
+                       (name, "niket1234@gmgm.com", age, 9999999999, vend_password))
+        
+        mydb.rollback()
+        
+  
+    except mysql.connector.Error as err:
+        print("Error:", err)
+        
+
+vendor_signup4(cursor, mydb)
 
 
 

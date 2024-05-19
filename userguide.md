@@ -1,3 +1,11 @@
+How to run this bookstore application in your system ->
+
+1) Run the table.sql file in your system 
+2) Run Entry_Bookstore.sql in your system
+3) now simply run sql.py in your system and do necessary connection changes in beginning of python script to read the sql server properly.
+4) Simply run the CLI according to instruction below.
+
+
 ### User Authentication
 
 Start
@@ -409,3 +417,7 @@ Start
 |       |--- End
 
 End
+
+
+
+
