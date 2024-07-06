@@ -1,13 +1,14 @@
 import mysql.connector
 import threading
-
+from flask import Flask, request, jsonify
 mydb = mysql.connector.connect(
-    host="************",
+    host="Nikets-MacBook-Air.local",
     user="root",
-    password="************",
+    password="Niket@mac",
     database="bookshop", 
     auth_plugin='mysql_native_password'
 )
+
 
 cursor = mydb.cursor()
 
@@ -44,14 +45,14 @@ def change_customer_password(cust_number):
     
 
 
-def display_message_from_trigger(cursor):
+# def display_message_from_trigger(cursor):
 
-    cursor.execute("SELECT message FROM LoginAttempts WHERE message IS NOT NULL")
-    result = cursor.fetchone()
-    if result:
-        print("Message from trigger:", result[0])
-    else:
-        print("No message from trigger.")
+#     cursor.execute("SELECT message FROM LoginAttempts WHERE message IS NOT NULL")
+#     result = cursor.fetchone()
+#     if result:
+#         print("Message from trigger:", result[0])
+#     else:
+#         print("No message from trigger.")
 
 def customer_signup():
     print("Customer Signup")
@@ -1666,132 +1667,141 @@ def homepage():
             print("Please select a valid option.")
 
 
-def conflict_3():
+@app.route('/Signup', methods=['POST'])
+def Signup():
+    data = request.get_json()
+    # Extract data and perform SQL INSERT operation
+    # ...
+    return jsonify({"message": "Sign up successful"})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+# def conflict_3():
     
-    vendor_id = 1  # Replace 1 with the actual vendor ID
-    book_id = 1    # Replace 1 with the actual book ID
-    quantity = 10  # Specify the quantity to delete
-    # Create two threads for concurrent deletion
-    thread1 = threading.Thread(target=delete_book, args=(vendor_id, book_id, quantity))
-    thread2 = threading.Thread(target=delete_book, args=(vendor_id, book_id, quantity))
+#     vendor_id = 1  # Replace 1 with the actual vendor ID
+#     book_id = 1    # Replace 1 with the actual book ID
+#     quantity = 10  # Specify the quantity to delete
+#     # Create two threads for concurrent deletion
+#     thread1 = threading.Thread(target=delete_book, args=(vendor_id, book_id, quantity))
+#     thread2 = threading.Thread(target=delete_book, args=(vendor_id, book_id, quantity))
 
-    # Start both threads
-    thread1.start()
-    thread2.start()
+#     # Start both threads
+#     thread1.start()
+#     thread2.start()
 
-    # Wait for both threads to finish
-    thread1.join()
-    thread2.join()
+#     # Wait for both threads to finish
+#     thread1.join()
+#     thread2.join()
 
-    # Close the database connection
-    cursor.close()
-    mydb.close()
+#     # Close the database connection
+#     cursor.close()
+#     mydb.close()
 
 
-def conflict_1():
-    agent_id = 1  
+# def conflict_1():
+#     agent_id = 1  
 
-    # Create two threads for concurrent setting availablity 
-    thread1 = threading.Thread(target=update_availability, args=(agent_id, "Available"))
-    thread2 = threading.Thread(target=update_availability, args=(agent_id, "Unavailable"))
+#     # Create two threads for concurrent setting availablity 
+#     thread1 = threading.Thread(target=update_availability, args=(agent_id, "Available"))
+#     thread2 = threading.Thread(target=update_availability, args=(agent_id, "Unavailable"))
     
     
-    thread1.start()
-    thread2.start()
+#     thread1.start()
+#     thread2.start()
 
-     # Wait for both threads to finish
-    thread1.join()
-    thread2.join()
+#      # Wait for both threads to finish
+#     thread1.join()
+#     thread2.join()
     
-    # Close the database connection
-    cursor.close()
-    mydb.close()
-    
-
-
-def conflict_2():
-    cust_phone_number = '8619631019' 
-
-    thread1 = threading.Thread(target=change_cust_password, args=(cust_phone_number, "Password123"))
-    thread2 = threading.Thread(target=change_cust_password, args=(cust_phone_number, "Secure456"))
-
-    thread1.start()
-    thread2.start()
-
-    thread1.join()
-    thread2.join()
-    cursor.close()
-    mydb.close()
+#     # Close the database connection
+#     cursor.close()
+#     mydb.close()
     
 
 
-lock = threading.Lock()
+# def conflict_2():
+#     cust_phone_number = '8619631019' 
 
-# conflict_1()
+#     thread1 = threading.Thread(target=change_cust_password, args=(cust_phone_number, "Password123"))
+#     thread2 = threading.Thread(target=change_cust_password, args=(cust_phone_number, "Secure456"))
 
-# conflict_2()
+#     thread1.start()
+#     thread2.start()
 
-# conflict_3()
-# homepage()
-
-
-def vendor_signup4(cursor, mydb):
-    print("Vendor Signup")
-    name = input("Enter vendor name: ")
-    email = input("Enter email: ")
-    vend_password = input("Enter your password: ")
+#     thread1.join()
+#     thread2.join()
+#     cursor.close()
+#     mydb.close()
     
-    while True:
-        try:
-            age = int(input("Enter age: "))
-            break
-        except ValueError:
-            print("Please enter a valid age (numeric value).")
 
-    phone_number = input("Enter phone number: ")
+
+# lock = threading.Lock()
+
+# # conflict_1()
+
+# # conflict_2()
+
+# # conflict_3()
+# # homepage()
+
+
+# def vendor_signup4(cursor, mydb):
+#     print("Vendor Signup")
+#     name = input("Enter vendor name: ")
+#     email = input("Enter email: ")
+#     vend_password = input("Enter your password: ")
     
-    while True:
-        try:
-            phone_number = int(phone_number)
-            break
-        except ValueError:
-            print("Please enter a valid phone number (numeric value).")
-            phone_number = input("Enter phone number: ")
+#     while True:
+#         try:
+#             age = int(input("Enter age: "))
+#             break
+#         except ValueError:
+#             print("Please enter a valid age (numeric value).")
+
+#     phone_number = input("Enter phone number: ")
     
-    try:
-        # Start first transaction
-        cursor.execute("START TRANSACTION")
+#     while True:
+#         try:
+#             phone_number = int(phone_number)
+#             break
+#         except ValueError:
+#             print("Please enter a valid phone number (numeric value).")
+#             phone_number = input("Enter phone number: ")
+    
+#     try:
+#         # Start first transaction
+#         cursor.execute("START TRANSACTION")
         
-        cursor.execute("INSERT INTO Vendor (vendor_name, Email, Age, Phone_number, vendor_password) VALUES (%s, %s, %s, %s, %s)",
-                       (name, email, age, phone_number, vend_password))
+#         cursor.execute("INSERT INTO Vendor (vendor_name, Email, Age, Phone_number, vendor_password) VALUES (%s, %s, %s, %s, %s)",
+#                        (name, email, age, phone_number, vend_password))
         
-        mydb.commit()
+#         mydb.commit()
         
         
-        print("First Vendor signup successful!")
-        mydb.rollback()
-    except mysql.connector.Error as err:
-        print("Error:", err)
-        print("Rolling back first transaction...")
-        mydb.rollback()
+#         print("First Vendor signup successful!")
+#         mydb.rollback()
+#     except mysql.connector.Error as err:
+#         print("Error:", err)
+#         print("Rolling back first transaction...")
+#         mydb.rollback()
 
-    try:
-        # Start second transaction
-        cursor.execute("START TRANSACTION")
+#     try:
+#         # Start second transaction
+#         cursor.execute("START TRANSACTION")
         
-        # Perform some other operation (for demonstration purposes, you can just print something)
-        print("Second transaction started.")
-        cursor.execute("INSERT INTO Vendor (vendor_name, Email, Age, Phone_number, vendor_password) VALUES (%s, %s, %s, %s, %s)",
-                       (name, "niket1234@gmgm.com", age, 9999999999, vend_password))
+#         # Perform some other operation (for demonstration purposes, you can just print something)
+#         print("Second transaction started.")
+#         cursor.execute("INSERT INTO Vendor (vendor_name, Email, Age, Phone_number, vendor_password) VALUES (%s, %s, %s, %s, %s)",
+#                        (name, "niket1234@gmgm.com", age, 9999999999, vend_password))
         
-        mydb.rollback()
+#         mydb.rollback()
         
   
-    except mysql.connector.Error as err:
-        print("Error:", err)
+#     except mysql.connector.Error as err:
+#         print("Error:", err)
         
 
-vendor_signup4(cursor, mydb)
+# vendor_signup4(cursor, mydb)
 
 
 
